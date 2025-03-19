@@ -153,7 +153,7 @@ For each test file, create a corresponding markdown documentation file in the `d
 
 Example:
 - Test file: `pkg/customerror/index_test.go`
-- Doc file: `docs/testing/pkg/customerrorindex_test.md`
+- Doc file(make name file same but markdown): `docs/testing/pkg/customerror/index_test.md`
 
 ### Documentation Template
 

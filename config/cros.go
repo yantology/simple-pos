@@ -12,7 +12,7 @@ import (
 var defaultOrigins = []string{"*"}
 
 func CorsConfig() gin.HandlerFunc {
-	origins := getEnvAsSlice("CORS_ALLOW_ORIGINS", defaultOrigins)
+	origins := GetEnvAsSlice("CORS_ALLOW_ORIGINS", defaultOrigins)
 	log.Println("CORS_ALLOW_ORIGINS => ", strings.Join(origins, ", "))
 
 	config := cors.DefaultConfig()
@@ -20,8 +20,8 @@ func CorsConfig() gin.HandlerFunc {
 	return cors.New(config)
 }
 
-// Helper function to get environment variable as a slice
-func getEnvAsSlice(name string, defaultVal []string) []string {
+// GetEnvAsSlice returns environment variable as a slice of strings
+func GetEnvAsSlice(name string, defaultVal []string) []string {
 	valStr := os.Getenv(name)
 	if valStr == "" {
 		return defaultVal
