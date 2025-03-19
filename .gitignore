@@ -1,0 +1,54 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.dylib
+*.test
+*.out
+*.prof
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+_testmain.go
+
+# Dependency directories
+vendor/
+Godeps/
+go.sum
+
+# Output directories
+bin/
+dist/
+
+# Debug files
+debug
+debug.test
+
+# Environment files
+.env
+.env.local
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
