@@ -10,24 +10,25 @@ import (
 
 // ResendUtils interface for sending emails using Resend API
 type ResendUtilsInterface interface {
+	Send(html, subject string, to []string) *customerror.CustomError
 }
 
-type MailUtils struct {
+type ResendUtils struct {
 	apiKey       string
 	resendDomain string
 	resendName   string
 }
 
 // NewResendUtils creates a new instance of ResendUtils
-func NewResendUtils(apiKey, resendDomain, resendName string) *MailUtils {
-	return &MailUtils{
+func NewResendUtils(apiKey, resendDomain, resendName string) ResendUtilsInterface {
+	return &ResendUtils{
 		apiKey:       apiKey,
 		resendDomain: resendDomain,
 		resendName:   resendName,
 	}
 }
 
-func (r *MailUtils) Send(html, subject string, to []string) *customerror.CustomError {
+func (r *ResendUtils) Send(html, subject string, to []string) *customerror.CustomError {
 	client := resend.NewClient(r.apiKey).Emails
 
 	params := &resend.SendEmailRequest{
