@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"database/sql"
+	"net/http"
 	"testing"
 	"time"
 
@@ -22,6 +23,7 @@ func TestCheckExistingEmail(t *testing.T) {
 		email     string
 		mockSetup func()
 		wantErr   bool
+		wantCode  int
 	}{
 		{
 			name:  "email exists",
@@ -31,7 +33,8 @@ func TestCheckExistingEmail(t *testing.T) {
 					WithArgs("test@example.com").
 					WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 			},
-			wantErr: false,
+			wantErr:  true,
+			wantCode: http.StatusConflict,
 		},
 		{
 			name:  "email not exists",
@@ -40,6 +43,16 @@ func TestCheckExistingEmail(t *testing.T) {
 				mock.ExpectQuery("SELECT 1 FROM users WHERE email = \\$1").
 					WithArgs("notfound@example.com").
 					WillReturnError(sql.ErrNoRows)
+			},
+			wantErr: false,
+		},
+		{
+			name:  "database error",
+			email: "test@example.com",
+			mockSetup: func() {
+				mock.ExpectQuery("SELECT 1 FROM users WHERE email = \\$1").
+					WithArgs("test@example.com").
+					WillReturnError(sql.ErrConnDone)
 			},
 			wantErr: true,
 		},
@@ -51,6 +64,9 @@ func TestCheckExistingEmail(t *testing.T) {
 			err := ap.CheckExistingEmail(tt.email)
 			if tt.wantErr {
 				assert.NotNil(t, err)
+				if tt.wantCode > 0 {
+					assert.Equal(t, tt.wantCode, err.Code())
+				}
 			} else {
 				assert.Nil(t, err)
 			}

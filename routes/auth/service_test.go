@@ -201,7 +201,7 @@ func TestHashAndVerifyPassword(t *testing.T) {
 	// Test password verification with wrong password
 	err = authService.VerifyHash(hashedPassword, "wrongpassword")
 	assert.NotNil(t, err)
-	assert.Equal(t, "Email atau password salah", err.Message())
+	assert.Equal(t, "Hash tidak cocok", err.Message())
 	assert.Equal(t, http.StatusUnauthorized, err.Code())
 }
 

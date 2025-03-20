@@ -19,11 +19,17 @@ func NewAuthPostgres(db *sql.DB) AuthDBInterface {
 }
 
 func (ap *authPostgres) CheckExistingEmail(email string) *customerror.CustomError {
-	err := ap.db.QueryRow("SELECT 1 FROM users WHERE email = $1", email).Err()
-	if err != nil {
-		return customerror.NewPostgresError(err)
+	var exists int
+	err := ap.db.QueryRow("SELECT 1 FROM users WHERE email = $1", email).Scan(&exists)
+
+	if err == sql.ErrNoRows {
+		return nil // Email doesn't exist
 	}
-	return nil
+	if err != nil {
+		return customerror.NewPostgresError(err) // Database error
+	}
+	// Email exists
+	return customerror.NewCustomError(nil, "email already exists", http.StatusConflict)
 }
 
 func (ap *authPostgres) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
