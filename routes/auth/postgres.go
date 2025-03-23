@@ -2,6 +2,8 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/yantology/retail-pro-be/pkg/customerror"
@@ -26,7 +28,8 @@ func (ap *authPostgres) CheckExistingEmail(email string) *customerror.CustomErro
 		return nil // Email doesn't exist
 	}
 	if err != nil {
-		return customerror.NewPostgresError(err) // Database error
+		log.Println("Error checking email existence:", err)
+		return customerror.NewCustomError(nil, "no no", http.StatusConflict) // Database error
 	}
 	// Email exists
 	return customerror.NewCustomError(nil, "email already exists", http.StatusConflict)
@@ -34,27 +37,33 @@ func (ap *authPostgres) CheckExistingEmail(email string) *customerror.CustomErro
 
 func (ap *authPostgres) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
 	query := `INSERT INTO activation_tokens (email, token_hash, type, expires_at) 
-			  VALUES ($1, $2, $3, NOW() + INTERVAL '$4 minutes')`
+			  VALUES ($1, $2, $3, NOW() + ($4 || ' minutes')::interval)
+			  ON CONFLICT (email, type) DO UPDATE
+			  SET token_hash = $2,
+				  expires_at = NOW() + ($4 || ' minutes')::interval`
 
-	_, err := ap.db.Exec(query, req.Email, req.TokenHash, req.TokenType, req.ExpiryMinutes)
+	_, err := ap.db.Exec(query, req.Email, req.ActivationCode, req.TokenType, req.ExpiryMinutes)
 	if err != nil {
+		log.Println("Error saving activation token:", err)
 		return customerror.NewPostgresError(err)
 	}
 	return nil
 }
 
-func (ap *authPostgres) ValidateActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
-	query := `SELECT id FROM activation_tokens 
-			  WHERE email = $1 AND token_hash = $2 AND type = $3 AND expires_at > NOW()`
+func (ap *authPostgres) GetActivationToken(req *GetActivationTokenRequest) (string, *customerror.CustomError) {
+	var storedHash string
+	query := `SELECT token_hash FROM activation_tokens 
+			  WHERE email = $1 AND type = $2 AND expires_at > NOW()`
 
-	err := ap.db.QueryRow(query, req.Email, req.TokenHash, req.TokenType).Err()
+	err := ap.db.QueryRow(query, req.Email, req.TokenType).Scan(&storedHash)
 	if err == sql.ErrNoRows {
-		return customerror.NewCustomError(err, "token not found or expired", http.StatusNotFound)
+		return "", customerror.NewCustomError(err, "token not found or expired", http.StatusNotFound)
 	}
 	if err != nil {
-		return customerror.NewPostgresError(err)
+		return "", customerror.NewPostgresError(err)
 	}
-	return nil
+
+	return storedHash, nil
 }
 
 func (ap *authPostgres) CreateUser(req *CreateUserRequest) *customerror.CustomError {
@@ -92,9 +101,11 @@ func (ap *authPostgres) GetUserByEmail(email string) (*User, *customerror.Custom
 		&user.CreatedAt, &user.UpdatedAt)
 
 	if err == sql.ErrNoRows {
+		fmt.Println("User not found:", email)
 		return nil, customerror.NewCustomError(err, "user not found", http.StatusNotFound)
 	}
 	if err != nil {
+		fmt.Println("Error retrieving user:", err)
 		return nil, customerror.NewPostgresError(err)
 	}
 	return user, nil

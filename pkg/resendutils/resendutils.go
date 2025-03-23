@@ -8,41 +8,36 @@ import (
 	"github.com/yantology/retail-pro-be/pkg/customerror"
 )
 
-// ResendUtils interface for sending emails using Resend API
 type ResendUtilsInterface interface {
 	Send(html, subject string, to []string) *customerror.CustomError
 }
 
 type ResendUtils struct {
-	apiKey       string
-	resendDomain string
-	resendName   string
+	apiKey     string
+	fromDomain string
 }
 
-// NewResendUtils creates a new instance of ResendUtils
-func NewResendUtils(apiKey, resendDomain, resendName string) ResendUtilsInterface {
+func NewResendUtils(apiKey, fromDomain string) ResendUtilsInterface {
 	return &ResendUtils{
-		apiKey:       apiKey,
-		resendDomain: resendDomain,
-		resendName:   resendName,
+		apiKey:     apiKey,
+		fromDomain: fromDomain,
 	}
 }
 
 func (r *ResendUtils) Send(html, subject string, to []string) *customerror.CustomError {
-	client := resend.NewClient(r.apiKey).Emails
+	client := resend.NewClient(r.apiKey)
 
 	params := &resend.SendEmailRequest{
-		From:    fmt.Sprintf("%s <noreply@%s>", r.resendName, r.resendDomain),
+		From:    fmt.Sprintf("Yantology <activation@%s>", r.fromDomain),
 		To:      to,
 		Subject: subject,
 		Html:    html,
 	}
 
-	sent, err := client.Send(params)
+	_, err := client.Emails.Send(params)
 	if err != nil {
 		return customerror.NewCustomError(err, "Failed to send email", http.StatusInternalServerError)
 	}
 
-	fmt.Printf("Email sent successfully with ID: %s\n", sent.Id)
 	return nil
 }

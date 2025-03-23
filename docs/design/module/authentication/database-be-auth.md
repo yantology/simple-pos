@@ -36,11 +36,12 @@ CREATE TABLE users (
 -- Tabel activation_tokens
 CREATE TABLE activation_tokens (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL,
+    email VARCHAR(255) unique NOT NULL,
     token_hash VARCHAR(255) NOT NULL,
     type VARCHAR(20) NOT NULL, -- 'registration' atau 'password_reset'
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    unique(email,type)
 );
 ```
 

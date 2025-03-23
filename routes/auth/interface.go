@@ -11,7 +11,7 @@ type AuthDBInterface interface {
 	SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError
 
 	// ValidateActivationToken validates if a token exists and is not expired
-	ValidateActivationToken(req *ActivationTokenRequest) *customerror.CustomError
+	GetActivationToken(req *GetActivationTokenRequest) (string, *customerror.CustomError)
 
 	// CreateUser creates a new user in the database
 	CreateUser(req *CreateUserRequest) *customerror.CustomError

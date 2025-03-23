@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/mail"
 	"time"
@@ -25,8 +26,7 @@ type AuthService interface {
 
 	// Token operations
 	GenerateTokenPair(req TokenPairRequest) (TokenPairResponse, *customerror.CustomError)
-	ValidateTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError)
-	GenerateAccessToken(userID, email, userType string) (string, *customerror.CustomError)
+	ValidateRefreshTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError)
 }
 
 type authService struct {
@@ -100,12 +100,12 @@ func (s *authService) VerifyHash(hashedString, input string) *customerror.Custom
 
 // GenerateTokenPair generates an access token and refresh token pair
 func (s *authService) GenerateTokenPair(req TokenPairRequest) (TokenPairResponse, *customerror.CustomError) {
-	accessToken, err := s.jwtService.GenerateAccesToken(req.UserID, req.Email, req.UserType)
+	accessToken, err := s.jwtService.GenerateAccesToken(req.UserID, req.Email)
 	if err != nil {
 		return TokenPairResponse{}, customerror.NewCustomError(err, "Gagal membuat access token", http.StatusInternalServerError)
 	}
 
-	refreshToken, err := s.jwtService.GenerateRefreshToken(req.UserID, req.Email, req.UserType)
+	refreshToken, err := s.jwtService.GenerateRefreshToken(req.UserID, req.Email)
 	if err != nil {
 		return TokenPairResponse{}, customerror.NewCustomError(err, "Gagal membuat refresh token", http.StatusInternalServerError)
 	}
@@ -125,8 +125,8 @@ func (s *authService) ValidatePasswordInput(password, passwordConfirmation strin
 }
 
 // ValidateTokenClaims validates and extracts claims from a JWT token
-func (s *authService) ValidateTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError) {
-	claims, err := s.jwtService.ValidateTokenClaims(token)
+func (s *authService) ValidateRefreshTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError) {
+	claims, err := s.jwtService.ValidateRefreshTokenClaims(token)
 	if err != nil {
 		var message string
 		var statusCode int
@@ -135,6 +135,7 @@ func (s *authService) ValidateTokenClaims(token string) (*jwtPkg.TokenClaims, *c
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				message = "Token sudah kadaluarsa"
 			} else {
+				log.Println("Token tidak valid:", err)
 				message = "Token tidak valid"
 			}
 			statusCode = http.StatusUnauthorized
@@ -146,13 +147,4 @@ func (s *authService) ValidateTokenClaims(token string) (*jwtPkg.TokenClaims, *c
 		return nil, customerror.NewCustomError(err, message, statusCode)
 	}
 	return claims, nil
-}
-
-// GenerateAccessToken generates a new access token
-func (s *authService) GenerateAccessToken(userID, email, userType string) (string, *customerror.CustomError) {
-	token, err := s.jwtService.GenerateAccesToken(userID, email, userType)
-	if err != nil {
-		return "", customerror.NewCustomError(err, "Gagal membuat access token baru", http.StatusInternalServerError)
-	}
-	return token, nil
 }

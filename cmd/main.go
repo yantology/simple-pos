@@ -1,13 +1,45 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/yantology/retail-pro-be/cmd/docs" // Updated path to use cmd/docs instead of just docs
+	"github.com/yantology/retail-pro-be/config"
+	_ "github.com/yantology/retail-pro-be/docs"
+	"github.com/yantology/retail-pro-be/pkg/jwt"
+	"github.com/yantology/retail-pro-be/pkg/resendutils"
+	"github.com/yantology/retail-pro-be/routes/auth"
 )
+
+// initMigrations initializes and runs database migrations
+func initMigrations(db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return fmt.Errorf("failed to create database driver: %v", err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"postgres", driver)
+	if err != nil {
+		return fmt.Errorf("failed to initialize migrations: %v", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("failed to run migrations: %v", err)
+	}
+
+	log.Println("Database migrations completed successfully")
+	return nil
+}
 
 // @title           Retail Pro API
 // @version         1.0
@@ -21,26 +53,64 @@ import (
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
+// @host      localhost:8000
 // @BasePath  /api/v1
-// @schemes   http
+// @schemes   http https
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using environment variables")
+	}
+
 	log.Println("Starting Retail Pro Backend Service...")
 
-	// Initialize Gin router
-	router := gin.Default()
+	// Initialize configurations
+	appConfig := config.InitAppConfig()
+	dbConfig := config.InitDatabaseConfig()
+	jwtConfig, err := config.InitJWTConfig()
+	if err != nil {
+		log.Fatal("Failed to initialize JWT config:", err)
+	}
+	resendConfig, err := config.InitResendConfig()
+	if err != nil {
+		log.Fatal("Failed to initialize Resend config:", err)
+	}
 
-	// Configure CORS if needed
+	db := config.ConnectDatabase(dbConfig, sql.Open)
+	defer db.Close()
+
+	// Run database migrations
+	if err := initMigrations(db); err != nil {
+		log.Fatal(err)
+	}
+
+	jwtService := jwt.NewJWTService(
+		jwtConfig.AccessSecret,
+		jwtConfig.RefreshSecret,
+		jwtConfig.AccessDuration,
+		jwtConfig.RefreshDuration,
+		jwtConfig.Issuer,
+	)
+	if err != nil {
+		log.Fatal("Failed to initialize JWT service:", err)
+	}
+	emailSender := resendutils.NewResendUtils(resendConfig.ApiKey, resendConfig.ResendDomain)
+
+	// Initialize Gin router with CORS configuration
+	router := gin.Default()
+	router.Use(config.CorsConfig())
 	router.Use(gin.Recovery())
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
-		v1.GET("/", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "Welcome to Retail Pro Backend Service API v1",
-			})
-		})
+		emailTemplate := auth.NewEmailTemplate()
+		authPostgres := auth.NewAuthPostgres(db)
+		authRepo := auth.NewAuthRepository(authPostgres)
+		authService := auth.NewAuthService(jwtService)
+		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate)
+
+		authHandler.RegisterRoutes(v1)
 	}
 
 	// Swagger documentation endpoint
@@ -53,9 +123,10 @@ func main() {
 		})
 	})
 
-	// Start the server
-	log.Println("Server is running on :8080...")
-	if err := router.Run(":8080"); err != nil {
+	// Start the server with configured port
+	serverAddr := fmt.Sprintf(":%s", appConfig.Port)
+	log.Printf("Server is running on %s...\n", serverAddr)
+	if err := router.Run(serverAddr); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
 }

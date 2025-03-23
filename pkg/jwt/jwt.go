@@ -8,17 +8,17 @@ import (
 
 // TokenClaims represents the claims in a JWT token.
 type TokenClaims struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
-	Type   string `json:"type"`
+	UserID    string `json:"user_id"`
+	Email     string `json:"email"`
+	TypeToken string `json:"type_token"`
 	jwt.StandardClaims
 }
 
 type JWTService interface {
-	GenerateAccesToken(userID, email, userType string) (string, error)
-	GenerateRefreshToken(userID, email, userType string) (string, error)
-	ValidateTokenClaims(token string) (*TokenClaims, error)
-	GetTokenClaims(token string) (*TokenClaims, error)
+	GenerateAccesToken(userID, email string) (string, error)
+	GenerateRefreshToken(userID, email string) (string, error)
+	ValidateAccessTokenClaims(token string) (*TokenClaims, error)
+	ValidateRefreshTokenClaims(token string) (*TokenClaims, error)
 }
 
 // Berbagai konstanta dan error yang sering digunakan
@@ -75,11 +75,11 @@ func NewJWTService(accessSecret, refreshSecret string, accessDuration, refresDur
 	}
 }
 
-func (j *jwtService) GenerateAccesToken(userID, email, userType string) (string, error) {
+func (j *jwtService) GenerateAccesToken(userID, email string) (string, error) {
 	claims := TokenClaims{
-		UserID: userID,
-		Email:  email,
-		Type:   userType,
+		UserID:    userID,
+		Email:     email,
+		TypeToken: "access",
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(j.accessDuration).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -90,11 +90,11 @@ func (j *jwtService) GenerateAccesToken(userID, email, userType string) (string,
 	return token.SignedString([]byte(j.accessSecret))
 }
 
-func (j *jwtService) GenerateRefreshToken(userID, email, userType string) (string, error) {
+func (j *jwtService) GenerateRefreshToken(userID, email string) (string, error) {
 	claims := TokenClaims{
-		UserID: userID,
-		Email:  email,
-		Type:   userType,
+		UserID:    userID,
+		Email:     email,
+		TypeToken: "refresh",
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(j.refresDuration).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -105,14 +105,18 @@ func (j *jwtService) GenerateRefreshToken(userID, email, userType string) (strin
 	return token.SignedString([]byte(j.refreshSecret))
 }
 
-func (j *jwtService) ValidateTokenClaims(token string) (*TokenClaims, error) {
-	return j.GetTokenClaims(token)
+func (j *jwtService) ValidateAccessTokenClaims(token string) (*TokenClaims, error) {
+	return j.GetTokenClaims(token, j.accessSecret)
 }
 
-func (j *jwtService) GetTokenClaims(token string) (*TokenClaims, error) {
+func (j *jwtService) ValidateRefreshTokenClaims(token string) (*TokenClaims, error) {
+	return j.GetTokenClaims(token, j.refreshSecret)
+}
+
+func (j *jwtService) GetTokenClaims(token string, secret string) (*TokenClaims, error) {
 	claims := &TokenClaims{}
 	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(j.accessSecret), nil
+		return []byte(secret), nil
 	})
 	if err != nil {
 		return nil, err

@@ -2,6 +2,15 @@
 
 This document provides guidelines on how to create unit tests and their corresponding documentation for the Retail Pro Backend project.
 
+## important
+
+
+you just can Equal,noEqual,ni,Not nil
+
+sometime if need you can using contain
+
+all using testify
+
 ## Creating Tests
 
 ### General Guidelines

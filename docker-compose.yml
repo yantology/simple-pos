@@ -7,7 +7,7 @@ services:
     depends_on:
       - db
     networks:
-      - go_initial
+      - retail-pro
   db:
     image: postgres:14-alpine
     env_file:
@@ -21,10 +21,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - go_initial
+      - retail-pro
 
 volumes:
   postgres_data:
 networks:
-  go_initial:
+  retail-pro:
     driver: bridge

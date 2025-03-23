@@ -9,9 +9,9 @@ import (
 )
 
 type ResendApi struct {
-	apiKey       string
-	resendDomain string
-	resendName   string
+	ApiKey       string
+	ResendDomain string
+	ResendName   string
 }
 
 func InitResendConfig() (*ResendApi, *customerror.CustomError) {
@@ -31,5 +31,5 @@ func InitResendConfig() (*ResendApi, *customerror.CustomError) {
 		return nil, customerror.NewCustomError(nil, "Resend name is not set", http.StatusUnauthorized)
 	}
 
-	return &ResendApi{apiKey: apiKey, resendDomain: resendDomain, resendName: resendName}, nil
+	return &ResendApi{ApiKey: apiKey, ResendDomain: resendDomain, ResendName: resendName}, nil
 }

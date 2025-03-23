@@ -4,9 +4,8 @@ import "time"
 
 // TokenPairRequest represents the input parameters for generating token pairs
 type TokenPairRequest struct {
-	UserID   string
-	Email    string
-	UserType string
+	UserID string
+	Email  string
 }
 
 // TokenPairResponse represents the response structure for token pairs
@@ -29,16 +28,21 @@ type User struct {
 	Email        string
 	Fullname     string
 	PasswordHash string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	CreatedAt    *time.Time
+	UpdatedAt    *time.Time
 }
 
 // ActivationTokenRequest represents input for token activation operations
 type ActivationTokenRequest struct {
-	Email         string
-	TokenHash     string // This is now token_hash from our previous change
-	TokenType     string
-	ExpiryMinutes int
+	Email          string
+	TokenType      string
+	ActivationCode string
+	ExpiryMinutes  int
+}
+
+type GetActivationTokenRequest struct {
+	Email     string
+	TokenType string
 }
 
 // CreateUserRequest represents input for creating a new user

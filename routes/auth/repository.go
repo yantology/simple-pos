@@ -2,34 +2,34 @@ package auth
 
 import "github.com/yantology/retail-pro-be/pkg/customerror"
 
-type authRepository struct {
+type AuthRepository struct {
 	db AuthDBInterface
 }
 
-func NewAuthRepository(db AuthDBInterface) *authRepository {
-	return &authRepository{db: db}
+func NewAuthRepository(db AuthDBInterface) *AuthRepository {
+	return &AuthRepository{db: db}
 }
 
-func (ar *authRepository) CheckExistingEmail(email string) *customerror.CustomError {
+func (ar *AuthRepository) CheckExistingEmail(email string) *customerror.CustomError {
 	return ar.db.CheckExistingEmail(email)
 }
 
-func (ar *authRepository) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
+func (ar *AuthRepository) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
 	return ar.db.SaveActivationToken(req)
 }
 
-func (ar *authRepository) ValidateActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
-	return ar.db.ValidateActivationToken(req)
+func (ar *AuthRepository) GetActivationToken(req *GetActivationTokenRequest) (string, *customerror.CustomError) {
+	return ar.db.GetActivationToken(req)
 }
 
-func (ar *authRepository) CreateUser(req *CreateUserRequest) *customerror.CustomError {
+func (ar *AuthRepository) CreateUser(req *CreateUserRequest) *customerror.CustomError {
 	return ar.db.CreateUser(req)
 }
 
-func (ar *authRepository) GetUserByEmail(email string) (*User, *customerror.CustomError) {
+func (ar *AuthRepository) GetUserByEmail(email string) (*User, *customerror.CustomError) {
 	return ar.db.GetUserByEmail(email)
 }
 
-func (ar *authRepository) UpdateUserPassword(req *UpdatePasswordRequest) *customerror.CustomError {
+func (ar *AuthRepository) UpdateUserPassword(req *UpdatePasswordRequest) *customerror.CustomError {
 	return ar.db.UpdateUserPassword(req)
 }
