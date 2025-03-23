@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/yantology/retail-pro-be/config"
 	"github.com/yantology/retail-pro-be/pkg/customerror"
 	jwtPkg "github.com/yantology/retail-pro-be/pkg/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -25,19 +26,21 @@ type AuthService interface {
 	ValidatePasswordInput(password, passwordConfirmation string) *customerror.CustomError
 
 	// Token operations
-	GenerateTokenPair(req TokenPairRequest) (TokenPairResponse, *customerror.CustomError)
+	GenerateTokenPairCookies(Writer http.ResponseWriter, req TokenPairRequest) *customerror.CustomError
 	ValidateRefreshTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError)
 }
 
 type authService struct {
-	jwtService jwtPkg.JWTService
+	jwtService  jwtPkg.JWTService
+	tokenConfig *config.TokenConfig
 }
 
 // NewAuthService creates a new instance of the AuthService
-func NewAuthService(jwtService jwtPkg.JWTService) AuthService {
+func NewAuthService(jwtService jwtPkg.JWTService, tokenConfig *config.TokenConfig) AuthService {
 	// Compile email regex once during initialization
 	return &authService{
-		jwtService: jwtService,
+		jwtService:  jwtService,
+		tokenConfig: tokenConfig,
 	}
 }
 
@@ -99,21 +102,43 @@ func (s *authService) VerifyHash(hashedString, input string) *customerror.Custom
 }
 
 // GenerateTokenPair generates an access token and refresh token pair
-func (s *authService) GenerateTokenPair(req TokenPairRequest) (TokenPairResponse, *customerror.CustomError) {
+func (s *authService) GenerateTokenPairCookies(Writer http.ResponseWriter, req TokenPairRequest) *customerror.CustomError {
 	accessToken, err := s.jwtService.GenerateAccesToken(req.UserID, req.Email)
 	if err != nil {
-		return TokenPairResponse{}, customerror.NewCustomError(err, "Gagal membuat access token", http.StatusInternalServerError)
+		return customerror.NewCustomError(err, "Gagal membuat access token", http.StatusInternalServerError)
 	}
 
 	refreshToken, err := s.jwtService.GenerateRefreshToken(req.UserID, req.Email)
 	if err != nil {
-		return TokenPairResponse{}, customerror.NewCustomError(err, "Gagal membuat refresh token", http.StatusInternalServerError)
+		return customerror.NewCustomError(err, "Gagal membuat refresh token", http.StatusInternalServerError)
 	}
 
-	return TokenPairResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	accessTokenCookie := &http.Cookie{
+		Name:     s.tokenConfig.AccessTokenName,
+		Value:    accessToken,
+		Path:     s.tokenConfig.CookiePath,
+		Domain:   s.tokenConfig.CookieDomain,
+		Secure:   s.tokenConfig.SecureCookie,
+		HttpOnly: true,
+		Expires:  time.Now().Add(s.tokenConfig.AccessTokenExpiry),
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	refreshTokenCookie := &http.Cookie{
+		Name:     s.tokenConfig.RefreshTokenName,
+		Value:    refreshToken,
+		Path:     s.tokenConfig.CookiePath,
+		Domain:   s.tokenConfig.CookieDomain,
+		Secure:   s.tokenConfig.SecureCookie,
+		HttpOnly: true,
+		Expires:  time.Now().Add(s.tokenConfig.RefreshTokenExpiry),
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(Writer, refreshTokenCookie)
+
+	http.SetCookie(Writer, accessTokenCookie)
+
+	return nil
 }
 
 // ValidatePasswordInput validates password reset input

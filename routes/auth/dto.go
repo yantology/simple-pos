@@ -39,17 +39,3 @@ type RefreshTokenRequest struct {
 type MessageResponse struct {
 	Message string `json:"message"`
 }
-
-// LoginResponseData represents login response data
-type jwtResponseData struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-}
-
-// LoginResponse represents a login response
-type DataResponse[T any] struct {
-	Message string `json:"message"`
-	Data    T      `json:"data"`
-}

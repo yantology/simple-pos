@@ -6,25 +6,14 @@ import (
 	"time"
 )
 
-// accessTokenName := getEnv("ACCESS_TOKEN_COOKIE_NAME", "access_token")
-// 	refreshTokenName := getEnv("REFRESH_TOKEN_COOKIE_NAME", "refresh_token")
-// 	cookiePath := getEnv("COOKIE_PATH", "/")
-// 	cookieDomain := getEnv("COOKIE_DOMAIN", "")
-// 	secureCookie := getEnvBool("COOKIE_SECURE", true)
-
-// 	// Access token duration (in seconds)
-// 	accessTokenExpiry := 900 // 15 minutes
-// 	// Refresh token duration (longer than access token)
-// 	refreshTokenExpiry := 86400 // 24 hours
-
 type TokenConfig struct {
 	AccessTokenName    string
 	RefreshTokenName   string
 	CookiePath         string
 	CookieDomain       string
-	secureCookie       bool
-	accessTokenExpiry  time.Duration
-	refreshTokenExpiry time.Duration
+	SecureCookie       bool
+	AccessTokenExpiry  time.Duration
+	RefreshTokenExpiry time.Duration
 }
 
 func InitTokenConfig() *TokenConfig {
@@ -80,8 +69,8 @@ func InitTokenConfig() *TokenConfig {
 		RefreshTokenName:   refreshTokenName,
 		CookiePath:         cookiePath,
 		CookieDomain:       cookieDomain,
-		secureCookie:       secureCookieBool,
-		accessTokenExpiry:  accessTokenExpiryDuration,
-		refreshTokenExpiry: refreshTokenExpiryDuration,
+		SecureCookie:       secureCookieBool,
+		AccessTokenExpiry:  accessTokenExpiryDuration,
+		RefreshTokenExpiry: refreshTokenExpiryDuration,
 	}
 }

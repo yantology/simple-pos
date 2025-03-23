@@ -281,7 +281,7 @@ func (h *authHandler) Login(c *gin.Context) {
 		Email:  user.Email,
 	}
 
-	tokenPair, cuserr := h.authService.GenerateTokenPair(tokenPairReq)
+	cuserr = h.authService.GenerateTokenPairCookies(c.Writer, tokenPairReq)
 	if cuserr != nil {
 		c.JSON(cuserr.Code(), MessageResponse{
 
@@ -290,14 +290,8 @@ func (h *authHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, DataResponse[jwtResponseData]{
+	c.JSON(http.StatusOK, MessageResponse{
 		Message: "Login berhasil",
-		Data: jwtResponseData{
-			AccessToken:  tokenPair.AccessToken,
-			RefreshToken: tokenPair.RefreshToken,
-			TokenType:    "Bearer",
-			ExpiresIn:    900, // 15 minutes in seconds
-		},
 	})
 }
 
@@ -423,7 +417,7 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Generate new access token
-	accessToken, cuserr := h.authService.GenerateTokenPair(tokenPair)
+	cuserr = h.authService.GenerateTokenPairCookies(c.Writer, tokenPair)
 	if cuserr != nil {
 		c.JSON(cuserr.Code(), MessageResponse{
 
@@ -432,14 +426,9 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, DataResponse[jwtResponseData]{
+	c.JSON(http.StatusOK, MessageResponse{
 		Message: "Token berhasil diperbarui",
-		Data: jwtResponseData{
-			AccessToken:  accessToken.AccessToken,
-			RefreshToken: accessToken.RefreshToken,
-			TokenType:    "Bearer",
-			ExpiresIn:    900, // 15 minutes in seconds
-		}})
+	})
 }
 
 // RegisterRoutes registers all auth routes

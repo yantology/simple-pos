@@ -68,6 +68,7 @@ func main() {
 	appConfig := config.InitAppConfig()
 	dbConfig := config.InitDatabaseConfig()
 	jwtConfig, err := config.InitJWTConfig()
+	tokenConfig := config.InitTokenConfig()
 	if err != nil {
 		log.Fatal("Failed to initialize JWT config:", err)
 	}
@@ -107,7 +108,7 @@ func main() {
 		emailTemplate := auth.NewEmailTemplate()
 		authPostgres := auth.NewAuthPostgres(db)
 		authRepo := auth.NewAuthRepository(authPostgres)
-		authService := auth.NewAuthService(jwtService)
+		authService := auth.NewAuthService(jwtService, tokenConfig)
 		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate)
 
 		authHandler.RegisterRoutes(v1)
