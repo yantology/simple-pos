@@ -20,7 +20,7 @@ func NewAuthPostgres(db *sql.DB) AuthDBInterface {
 	return &authPostgres{db: db}
 }
 
-func (ap *authPostgres) CheckExistingEmail(email string) *customerror.CustomError {
+func (ap *authPostgres) CheckIsNotExistingEmail(email string) *customerror.CustomError {
 	var exists int
 	err := ap.db.QueryRow("SELECT 1 FROM users WHERE email = $1", email).Scan(&exists)
 
@@ -28,11 +28,25 @@ func (ap *authPostgres) CheckExistingEmail(email string) *customerror.CustomErro
 		return nil // Email doesn't exist
 	}
 	if err != nil {
-		log.Println("Error checking email existence:", err)
-		return customerror.NewCustomError(nil, "no no", http.StatusConflict) // Database error
+		return customerror.NewPostgresError(err) // Database error
 	}
 	// Email exists
 	return customerror.NewCustomError(nil, "email already exists", http.StatusConflict)
+}
+
+func (ap *authPostgres) CheckIsExistingEmail(email string) *customerror.CustomError {
+	var exists int
+	err := ap.db.QueryRow("SELECT 1 FROM users WHERE email = $1", email).Scan(&exists)
+
+	if err == nil {
+		return nil // Email exists
+	}
+	if err == sql.ErrNoRows {
+		return customerror.NewCustomError(nil, "email not found", http.StatusNotFound) // Email doesn't exist
+	}
+
+	return customerror.NewPostgresError(err) // Database error
+
 }
 
 func (ap *authPostgres) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {

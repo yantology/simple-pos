@@ -27,6 +27,7 @@ type AuthService interface {
 
 	// Token operations
 	GenerateTokenPairCookies(Writer http.ResponseWriter, req TokenPairRequest) *customerror.CustomError
+	GenerateLogoutCookies(Writer http.ResponseWriter)
 	ValidateRefreshTokenClaims(token string) (*jwtPkg.TokenClaims, *customerror.CustomError)
 }
 
@@ -75,6 +76,15 @@ func (s *authService) ValidateRegistrationInput(req RegistrationRequest) *custom
 		return customerror.NewCustomError(nil, "Username maksimal 30 karakter", http.StatusBadRequest)
 	}
 
+	if req.Password == "" {
+		return customerror.NewCustomError(nil, "Password tidak boleh kosong", http.StatusBadRequest)
+	}
+
+	// Validate password complexity
+	if len(req.Password) < 8 || len(req.Password) > 20 {
+		return customerror.NewCustomError(nil, "Password harus antara 8 dan 20 karakter", http.StatusBadRequest)
+	}
+
 	// Validate password match
 	if req.Password != req.PasswordConfirmation {
 		return customerror.NewCustomError(nil, "Password tidak cocok dengan konfirmasi", http.StatusBadRequest)
@@ -99,6 +109,34 @@ func (s *authService) VerifyHash(hashedString, input string) *customerror.Custom
 		return customerror.NewCustomError(err, "Hash tidak cocok", http.StatusUnauthorized)
 	}
 	return nil
+}
+
+// Generate cookies for logout
+func (s *authService) GenerateLogoutCookies(Writer http.ResponseWriter) {
+	accessTokenCookie := &http.Cookie{
+		Name:     s.tokenConfig.AccessTokenName,
+		Value:    "",
+		Path:     s.tokenConfig.CookiePath,
+		Domain:   s.tokenConfig.CookieDomain,
+		Secure:   s.tokenConfig.SecureCookie,
+		HttpOnly: true,
+		Expires:  time.Now().Add(-1 * time.Hour),
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	refreshTokenCookie := &http.Cookie{
+		Name:     s.tokenConfig.RefreshTokenName,
+		Value:    "",
+		Path:     s.tokenConfig.CookiePath,
+		Domain:   s.tokenConfig.CookieDomain,
+		Secure:   s.tokenConfig.SecureCookie,
+		HttpOnly: true,
+		Expires:  time.Now().Add(-1 * time.Hour),
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(Writer, accessTokenCookie)
+	http.SetCookie(Writer, refreshTokenCookie)
 }
 
 // GenerateTokenPair generates an access token and refresh token pair

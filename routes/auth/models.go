@@ -8,12 +8,6 @@ type TokenPairRequest struct {
 	Email  string
 }
 
-// TokenPairResponse represents the response structure for token pairs
-type TokenPairResponse struct {
-	AccessToken  string
-	RefreshToken string
-}
-
 // RegistrationRequest represents the input parameters for user registration
 type RegistrationRequest struct {
 	Email                string

@@ -1,21 +1,19 @@
 basePath: /api/v1
 definitions:
-  auth.DataResponse-auth_jwtResponseData:
-    properties:
-      data:
-        $ref: '#/definitions/auth.jwtResponseData'
-      message:
-        type: string
-    type: object
   auth.ForgetPasswordRequest:
+    description: Password reset request model
     properties:
       activation_code:
+        example: "123456"
         type: string
       email:
+        example: user@example.com
         type: string
       new_password:
+        example: newSecurePassword123
         type: string
       new_password_confirmation:
+        example: newSecurePassword123
         type: string
     required:
     - activation_code
@@ -24,38 +22,42 @@ definitions:
     - new_password_confirmation
     type: object
   auth.LoginRequest:
+    description: Login request model
     properties:
       email:
+        example: user@example.com
         type: string
       password:
+        example: securePassword123
         type: string
     required:
     - email
     - password
     type: object
   auth.MessageResponse:
+    description: Generic message response model
     properties:
       message:
+        example: Operation completed successfully
         type: string
-    type: object
-  auth.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
     type: object
   auth.RegisterRequest:
+    description: Registration request model
     properties:
       activation_code:
+        example: "123456"
         type: string
       email:
+        example: user@example.com
         type: string
       fullname:
+        example: John Doe
         type: string
       password:
+        example: securePassword123
         type: string
       password_confirmation:
+        example: securePassword123
         type: string
     required:
     - activation_code
@@ -65,22 +67,13 @@ definitions:
     - password_confirmation
     type: object
   auth.TokenRequest:
+    description: Token request model
     properties:
       email:
+        example: user@example.com
         type: string
     required:
     - email
-    type: object
-  auth.jwtResponseData:
-    properties:
-      access_token:
-        type: string
-      expires_in:
-        type: integer
-      refresh_token:
-        type: string
-      token_type:
-        type: string
     type: object
 host: localhost:8000
 info:
@@ -142,45 +135,53 @@ paths:
       - application/json
       responses:
         "200":
-          description: Success response with JWT tokens
+          description: OK
           schema:
-            $ref: '#/definitions/auth.DataResponse-auth_jwtResponseData'
+            $ref: '#/definitions/auth.MessageResponse'
         "400":
-          description: Bad request response
+          description: Bad Request
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "401":
-          description: Unauthorized response
+          description: Unauthorized
           schema:
             $ref: '#/definitions/auth.MessageResponse'
       summary: User login
       tags:
       - auth
-  /auth/refresh-token:
+  /auth/logout:
     post:
       consumes:
       - application/json
-      description: Get new access token using refresh token
-      parameters:
-      - description: Refresh token details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.RefreshTokenRequest'
+      description: Clear user authentication cookies
       produces:
       - application/json
       responses:
         "200":
-          description: Success response with new JWT tokens
+          description: Success response with message
           schema:
-            $ref: '#/definitions/auth.DataResponse-auth_jwtResponseData'
+            $ref: '#/definitions/auth.MessageResponse'
+      summary: User logout
+      tags:
+      - auth
+  /auth/refresh-token:
+    get:
+      consumes:
+      - application/json
+      description: Get new access token using refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.MessageResponse'
         "400":
-          description: Bad request response
+          description: Bad Request
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "401":
-          description: Unauthorized response
+          description: Unauthorized
           schema:
             $ref: '#/definitions/auth.MessageResponse'
       summary: Refresh token
@@ -202,15 +203,15 @@ paths:
       - application/json
       responses:
         "201":
-          description: Success response with message
+          description: Created
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "400":
-          description: Bad request response
+          description: Bad Request
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "401":
-          description: Unauthorized response
+          description: Unauthorized
           schema:
             $ref: '#/definitions/auth.MessageResponse'
       summary: Register new user
@@ -237,19 +238,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: Success response with message
+          description: OK
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "400":
-          description: Bad request response
+          description: Bad Request
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "404":
-          description: Not found response
+          description: Not Found
           schema:
             $ref: '#/definitions/auth.MessageResponse'
         "409":
-          description: Conflict response
+          description: Conflict
           schema:
             $ref: '#/definitions/auth.MessageResponse'
       summary: Request activation token

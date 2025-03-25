@@ -109,7 +109,7 @@ func main() {
 		authPostgres := auth.NewAuthPostgres(db)
 		authRepo := auth.NewAuthRepository(authPostgres)
 		authService := auth.NewAuthService(jwtService, tokenConfig)
-		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate)
+		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate, tokenConfig)
 
 		authHandler.RegisterRoutes(v1)
 	}

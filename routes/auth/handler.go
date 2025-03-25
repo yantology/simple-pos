@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yantology/retail-pro-be/config"
 	"github.com/yantology/retail-pro-be/pkg/resendutils"
 )
 
@@ -12,6 +13,7 @@ type authHandler struct {
 	authRepository *AuthRepository
 	emailSender    resendutils.ResendUtilsInterface
 	emailTemplate  EmailTemplateInterface
+	tokenRequest   *config.TokenConfig
 }
 
 func NewAuthHandler(
@@ -19,12 +21,14 @@ func NewAuthHandler(
 	authRepository *AuthRepository,
 	emailSender resendutils.ResendUtilsInterface,
 	emailTemplate EmailTemplateInterface,
+	tokenRequest *config.TokenConfig,
 ) *authHandler {
 	return &authHandler{
 		authService:    authService,
 		authRepository: authRepository,
 		emailSender:    emailSender,
 		emailTemplate:  emailTemplate,
+		tokenRequest:   tokenRequest,
 	}
 }
 
@@ -35,10 +39,10 @@ func NewAuthHandler(
 // @Produce json
 // @Param type path string true "Token type (registration or forget-password)"
 // @Param request body TokenRequest true "Token request parameters"
-// @Success 200 {object} MessageResponse "Success response with message"
-// @Failure 400 {object} MessageResponse "Bad request response"
-// @Failure 404 {object} MessageResponse "Not found response"
-// @Failure 409 {object} MessageResponse "Conflict response"
+// @Success 200 {object} MessageResponse
+// @Failure 400 {object} MessageResponse
+// @Failure 404 {object} MessageResponse
+// @Failure 409 {object} MessageResponse
 // @Router /auth/token/{type} [post]
 func (h *authHandler) RequestToken(c *gin.Context) {
 	tokenType := c.Param("type")
@@ -72,7 +76,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 
 	// Check if email exists based on token type
 	if tokenType == "registration" {
-		if cuserr := h.authRepository.CheckExistingEmail(req.Email); cuserr != nil {
+		if cuserr := h.authRepository.CheckIsNotExistingEmail(req.Email); cuserr != nil {
 			c.JSON(http.StatusConflict, MessageResponse{
 
 				Message: "test 1 2 3",
@@ -80,7 +84,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 			return
 		}
 	} else if tokenType == "forget-password" {
-		if cuserr := h.authRepository.CheckExistingEmail(req.Email); cuserr == nil {
+		if cuserr := h.authRepository.CheckIsExistingEmail(req.Email); cuserr == nil {
 			c.JSON(http.StatusNotFound, MessageResponse{
 
 				Message: "Email tidak terdaftar",
@@ -156,9 +160,9 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body RegisterRequest true "Registration details"
-// @Success 201 {object} MessageResponse "Success response with message"
-// @Failure 400 {object} MessageResponse "Bad request response"
-// @Failure 401 {object} MessageResponse "Unauthorized response"
+// @Success 201 {object} MessageResponse
+// @Failure 400 {object} MessageResponse
+// @Failure 401 {object} MessageResponse
 // @Router /auth/register [post]
 func (h *authHandler) Register(c *gin.Context) {
 	var req RegisterRequest
@@ -242,9 +246,9 @@ func (h *authHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "Login credentials"
-// @Success 200 {object} DataResponse[jwtResponseData] "Success response with JWT tokens"
-// @Failure 400 {object} MessageResponse "Bad request response"
-// @Failure 401 {object} MessageResponse "Unauthorized response"
+// @Success 200 {object} MessageResponse
+// @Failure 400 {object} MessageResponse
+// @Failure 401 {object} MessageResponse
 // @Router /auth/login [post]
 func (h *authHandler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -381,14 +385,13 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body RefreshTokenRequest true "Refresh token details"
-// @Success 200 {object} DataResponse[jwtResponseData] "Success response with new JWT tokens"
-// @Failure 400 {object} MessageResponse "Bad request response"
-// @Failure 401 {object} MessageResponse "Unauthorized response"
-// @Router /auth/refresh-token [post]
+// @Success 200 {object} MessageResponse
+// @Failure 400 {object} MessageResponse
+// @Failure 401 {object} MessageResponse
+// @Router /auth/refresh-token [get]
 func (h *authHandler) RefreshToken(c *gin.Context) {
 	// Get refresh token from cookies
-	refreshToken, err := c.Cookie("refresh_token")
+	refreshToken, err := c.Cookie(h.tokenRequest.RefreshTokenName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, MessageResponse{
 			Message: "Refresh token tidak ditemukan dalam cookies",
@@ -396,13 +399,8 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Create request object with token from cookie
-	req := RefreshTokenRequest{
-		RefreshToken: refreshToken,
-	}
-
 	// Validate refresh token
-	claims, cuserr := h.authService.ValidateRefreshTokenClaims(req.RefreshToken)
+	claims, cuserr := h.authService.ValidateRefreshTokenClaims(refreshToken)
 	if cuserr != nil {
 		c.JSON(cuserr.Code(), MessageResponse{
 
@@ -431,6 +429,21 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 	})
 }
 
+// @Summary User logout
+// @Description Clear user authentication cookies
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} MessageResponse "Success response with message"
+// @Router /auth/logout [post]
+func (h *authHandler) Logout(c *gin.Context) {
+	h.authService.GenerateLogoutCookies(c.Writer)
+
+	c.JSON(http.StatusOK, MessageResponse{
+		Message: "Logout berhasil",
+	})
+}
+
 // RegisterRoutes registers all auth routes
 func (h *authHandler) RegisterRoutes(router *gin.RouterGroup) {
 	authGroup := router.Group("/auth")
@@ -440,5 +453,6 @@ func (h *authHandler) RegisterRoutes(router *gin.RouterGroup) {
 		authGroup.POST("/login", h.Login)
 		authGroup.POST("/forget-password", h.ForgetPassword)
 		authGroup.GET("/refresh-token", h.RefreshToken)
+		authGroup.POST("/logout", h.Logout)
 	}
 }

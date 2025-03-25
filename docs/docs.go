@@ -96,19 +96,42 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success response with JWT tokens",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.DataResponse-auth_jwtResponseData"
+                            "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request response",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized response",
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "Clear user authentication cookies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "Success response with message",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
@@ -117,7 +140,7 @@ const docTemplate = `{
             }
         },
         "/auth/refresh-token": {
-            "post": {
+            "get": {
                 "description": "Get new access token using refresh token",
                 "consumes": [
                     "application/json"
@@ -129,32 +152,21 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Refresh token",
-                "parameters": [
-                    {
-                        "description": "Refresh token details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth.RefreshTokenRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Success response with new JWT tokens",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.DataResponse-auth_jwtResponseData"
+                            "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request response",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized response",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
@@ -188,19 +200,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Success response with message",
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request response",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized response",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
@@ -241,25 +253,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success response with message",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request response",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "404": {
-                        "description": "Not found response",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
                     },
                     "409": {
-                        "description": "Conflict response",
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/auth.MessageResponse"
                         }
@@ -269,18 +281,8 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.DataResponse-auth_jwtResponseData": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/auth.jwtResponseData"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "auth.ForgetPasswordRequest": {
+            "description": "Password reset request model",
             "type": "object",
             "required": [
                 "activation_code",
@@ -290,20 +292,25 @@ const docTemplate = `{
             ],
             "properties": {
                 "activation_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "new_password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "newSecurePassword123"
                 },
                 "new_password_confirmation": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "newSecurePassword123"
                 }
             }
         },
         "auth.LoginRequest": {
+            "description": "Login request model",
             "type": "object",
             "required": [
                 "email",
@@ -311,33 +318,27 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "securePassword123"
                 }
             }
         },
         "auth.MessageResponse": {
+            "description": "Generic message response model",
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.RefreshTokenRequest": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Operation completed successfully"
                 }
             }
         },
         "auth.RegisterRequest": {
+            "description": "Registration request model",
             "type": "object",
             "required": [
                 "activation_code",
@@ -348,47 +349,37 @@ const docTemplate = `{
             ],
             "properties": {
                 "activation_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "fullname": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John Doe"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "securePassword123"
                 },
                 "password_confirmation": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "securePassword123"
                 }
             }
         },
         "auth.TokenRequest": {
+            "description": "Token request model",
             "type": "object",
             "required": [
                 "email"
             ],
             "properties": {
                 "email": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.jwtResponseData": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "expires_in": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "token_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 }
             }
         }

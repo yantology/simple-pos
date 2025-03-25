@@ -10,8 +10,12 @@ func NewAuthRepository(db AuthDBInterface) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-func (ar *AuthRepository) CheckExistingEmail(email string) *customerror.CustomError {
-	return ar.db.CheckExistingEmail(email)
+func (ar *AuthRepository) CheckIsExistingEmail(email string) *customerror.CustomError {
+	return ar.db.CheckIsExistingEmail(email)
+}
+
+func (ar *AuthRepository) CheckIsNotExistingEmail(email string) *customerror.CustomError {
+	return ar.db.CheckIsNotExistingEmail(email)
 }
 
 func (ar *AuthRepository) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {
