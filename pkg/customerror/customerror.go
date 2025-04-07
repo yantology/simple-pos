@@ -62,7 +62,7 @@ func NewPostgresError(err error) *CustomError {
 
 	// Generic database error
 	if errors.Is(err, sql.ErrNoRows) {
-		return NewCustomError(err, "Record not found", http.StatusNotFound)
+		return NewCustomError(err, err.Error(), http.StatusNotFound)
 	}
 
 	// Default error handling

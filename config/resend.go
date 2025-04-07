@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/yantology/retail-pro-be/pkg/customerror"
+	"github.com/yantology/golang-starter-template/pkg/customerror"
 )
 
 type ResendApi struct {

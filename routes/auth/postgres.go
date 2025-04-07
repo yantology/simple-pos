@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yantology/retail-pro-be/pkg/customerror"
+	"github.com/yantology/golang-starter-template/pkg/customerror"
 )
 
 // Verify interface implementation
@@ -21,17 +21,26 @@ func NewAuthPostgres(db *sql.DB) AuthDBInterface {
 }
 
 func (ap *authPostgres) CheckIsNotExistingEmail(email string) *customerror.CustomError {
-	var exists int
-	err := ap.db.QueryRow("SELECT 1 FROM users WHERE email = $1", email).Scan(&exists)
+	// For empty email, return an error
+	if email == "" {
+		return customerror.NewCustomError(nil, "email is required", http.StatusBadRequest)
+	}
 
-	if err == sql.ErrNoRows {
-		return nil // Email doesn't exist
-	}
+	// Check if email exists with a simple count query (more consistent approach)
+	var count int
+	query := "SELECT COUNT(*) FROM users WHERE email = $1"
+	err := ap.db.QueryRow(query, email).Scan(&count)
 	if err != nil {
-		return customerror.NewPostgresError(err) // Database error
+		return customerror.NewPostgresError(err)
 	}
-	// Email exists
-	return customerror.NewCustomError(nil, "email already exists", http.StatusConflict)
+
+	// If count > 0, email exists
+	if count > 0 {
+		return customerror.NewCustomError(nil, "email already exists", http.StatusConflict)
+	}
+
+	// Email doesn't exist, so it's available
+	return nil
 }
 
 func (ap *authPostgres) CheckIsExistingEmail(email string) *customerror.CustomError {
@@ -46,7 +55,6 @@ func (ap *authPostgres) CheckIsExistingEmail(email string) *customerror.CustomEr
 	}
 
 	return customerror.NewPostgresError(err) // Database error
-
 }
 
 func (ap *authPostgres) SaveActivationToken(req *ActivationTokenRequest) *customerror.CustomError {

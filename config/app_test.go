@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/retail-pro-be/config"
+	"github.com/yantology/golang-starter-template/config"
 )
 
 func TestInitAppConfig(t *testing.T) {

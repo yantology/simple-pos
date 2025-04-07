@@ -31,7 +31,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/retail-pro-be/yourpackage" // Import the package being tested
+	"github.com/yantology/golang-starter-template/yourpackage" // Import the package being tested
 )
 
 func TestYourFunction(t *testing.T) {
@@ -85,8 +85,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/yantology/retail-pro-be/mock"
-	"github.com/yantology/retail-pro-be/repository"
+	"github.com/yantology/golang-starter-template/mock"
+	"github.com/yantology/golang-starter-template/repository"
 )
 
 // Create a mock implementation of your interface

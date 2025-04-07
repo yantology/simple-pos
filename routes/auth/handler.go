@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yantology/retail-pro-be/config"
-	"github.com/yantology/retail-pro-be/pkg/resendutils"
+	"github.com/yantology/golang-starter-template/config"
+	"github.com/yantology/golang-starter-template/pkg/resendutils"
 )
 
 type authHandler struct {
@@ -84,10 +84,10 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 			return
 		}
 	} else if tokenType == "forget-password" {
-		if cuserr := h.authRepository.CheckIsExistingEmail(req.Email); cuserr == nil {
+		if cuserr := h.authRepository.CheckIsExistingEmail(req.Email); cuserr != nil {
 			c.JSON(http.StatusNotFound, MessageResponse{
 
-				Message: "Email tidak terdaftar",
+				Message: cuserr.Message(),
 			})
 			return
 		}
@@ -453,6 +453,6 @@ func (h *authHandler) RegisterRoutes(router *gin.RouterGroup) {
 		authGroup.POST("/login", h.Login)
 		authGroup.POST("/forget-password", h.ForgetPassword)
 		authGroup.GET("/refresh-token", h.RefreshToken)
-		authGroup.POST("/logout", h.Logout)
+		authGroup.DELETE("/logout", h.Logout)
 	}
 }

@@ -1,4 +1,4 @@
-module github.com/yantology/retail-pro-be
+module github.com/yantology/golang-starter-template
 
 go 1.24.1
 

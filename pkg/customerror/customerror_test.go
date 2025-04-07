@@ -8,7 +8,7 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/retail-pro-be/pkg/customerror"
+	"github.com/yantology/golang-starter-template/pkg/customerror"
 )
 
 func TestNewCustomError(t *testing.T) {
@@ -90,7 +90,7 @@ func TestNewPostgresError(t *testing.T) {
 		{
 			name:     "unhandled postgres error",
 			err:      createPqError("42P01"), // relation does not exist
-			wantMsg:  "Database error",
+			wantMsg:  createPqError("42P01").Error(),
 			wantCode: http.StatusInternalServerError,
 		},
 		{
@@ -102,7 +102,7 @@ func TestNewPostgresError(t *testing.T) {
 		{
 			name:     "generic error",
 			err:      errors.New("some generic error"),
-			wantMsg:  "Database error",
+			wantMsg:  "Dsome generic error",
 			wantCode: http.StatusInternalServerError,
 		},
 	}

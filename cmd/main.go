@@ -12,11 +12,11 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/yantology/retail-pro-be/config"
-	_ "github.com/yantology/retail-pro-be/docs"
-	"github.com/yantology/retail-pro-be/pkg/jwt"
-	"github.com/yantology/retail-pro-be/pkg/resendutils"
-	"github.com/yantology/retail-pro-be/routes/auth"
+	"github.com/yantology/golang-starter-template/config"
+	_ "github.com/yantology/golang-starter-template/docs"
+	"github.com/yantology/golang-starter-template/pkg/jwt"
+	"github.com/yantology/golang-starter-template/pkg/resendutils"
+	"github.com/yantology/golang-starter-template/routes/auth"
 )
 
 // initMigrations initializes and runs database migrations
@@ -56,6 +56,10 @@ func initMigrations(db *sql.DB) error {
 // @host      localhost:8000
 // @BasePath  /api/v1
 // @schemes   http https
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
@@ -97,6 +101,9 @@ func main() {
 	}
 	emailSender := resendutils.NewResendUtils(resendConfig.ApiKey, resendConfig.ResendDomain)
 
+	// Initialize Auth middleware
+	// authMiddleware := middleware.NewAuthMiddleware(jwtService, tokenConfig)
+
 	// Initialize Gin router with CORS configuration
 	router := gin.Default()
 	router.Use(config.CorsConfig())
@@ -105,13 +112,14 @@ func main() {
 	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
+		// Auth routes
 		emailTemplate := auth.NewEmailTemplate()
 		authPostgres := auth.NewAuthPostgres(db)
 		authRepo := auth.NewAuthRepository(authPostgres)
 		authService := auth.NewAuthService(jwtService, tokenConfig)
 		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate, tokenConfig)
-
 		authHandler.RegisterRoutes(v1)
+
 	}
 
 	// Swagger documentation endpoint

@@ -6,7 +6,7 @@ This document lists all the database tables in the project and their migration h
 
 - [Table 1](#table-1)
 - [Table 2](#table-2)
-<!-- Add a new table to this list -->
+- [Tenant](#tenant)
 
 ## Table Details
 
@@ -70,6 +70,34 @@ This document lists all the database tables in the project and their migration h
 
 - `YYYYMMDDHHMMSS_create_table_2.php` - Initial table creation
 - `YYYYMMDDHHMMSS_status_column.php` - Adding status column
+
+### Tenant
+
+**Table Name:** `tenant`
+
+**Description:** Stores tenant information linked to users.
+
+**Structure:**
+
+| Column      | Data Type      | Nullable | Default           | Description                     |
+|-------------|----------------|----------|-------------------|---------------------------------|
+| id          | int            | no       | auto_increment    | Primary Key                    |
+| username    | varchar(255)   | no       | -                 | Tenant username                |
+| description | text           | yes      | NULL              | Description of the tenant      |
+| user_id     | int            | no       | -                 | Foreign key referencing `users`|
+| created_at  | timestamp      | no       | CURRENT_TIMESTAMP | Record creation time           |
+
+**Index:**
+
+- PRIMARY KEY (`id`)
+
+**Relations:**
+
+- `user_id` references `users(id)` with `ON DELETE CASCADE`
+
+**Migration History:**
+
+- `20250320000002_create_tenant_table.up.sql` - Initial table creation
 
 <!--
 ## Template for New Table

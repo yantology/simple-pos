@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/yantology/retail-pro-be/pkg/customerror"
+import "github.com/yantology/golang-starter-template/pkg/customerror"
 
 // AuthDBInterface defines the interface for authentication database operations
 type AuthDBInterface interface {
