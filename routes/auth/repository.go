@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/yantology/golang-starter-template/pkg/customerror"
+import "github.com/yantology/simple-ecommerce/pkg/customerror"
 
 type AuthRepository struct {
 	db AuthDBInterface

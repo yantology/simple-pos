@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/yantology/golang-starter-template/config"
-	"github.com/yantology/golang-starter-template/pkg/customerror"
-	jwtPkg "github.com/yantology/golang-starter-template/pkg/jwt"
+	"github.com/yantology/simple-ecommerce/config"
+	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	jwtPkg "github.com/yantology/simple-ecommerce/pkg/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 

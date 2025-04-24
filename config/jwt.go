@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yantology/golang-starter-template/pkg/customerror"
+	"github.com/yantology/simple-ecommerce/pkg/customerror"
 )
 
 type JWTConfig struct {

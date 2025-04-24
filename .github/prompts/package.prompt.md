@@ -22,7 +22,7 @@ The `customerror` package provides standardized error handling for HTTP applicat
 ### Usage
 
 ```go
-import "github.com/yantology/golang-starter-template/pkg/customerror"
+import "github.com/yantology/simple-ecommerce/pkg/customerror"
 
 // Creating a custom error
 err := customerror.NewCustomError(originalError, "User-friendly message", http.StatusBadRequest)
@@ -73,7 +73,7 @@ The `jwt` package provides JWT (JSON Web Token) authentication functionality for
 ```go
 import (
     "time"
-    "github.com/yantology/golang-starter-template/pkg/jwt"
+    "github.com/yantology/simple-ecommerce/pkg/jwt"
 )
 
 // Initialize JWT service with custom parameters
@@ -127,7 +127,7 @@ The `resendutils` package provides email functionality using the [Resend](https:
 ### Usage
 
 ```go
-import "github.com/yantology/golang-starter-template/pkg/resendutils"
+import "github.com/yantology/simple-ecommerce/pkg/resendutils"
 
 // Initialize the Resend utility
 resend := resendutils.NewResendUtils(
@@ -167,7 +167,7 @@ The `dto` package provides standardized structures for API responses, ensuring c
 ### Usage
 
 ```go
-import "github.com/yantology/golang-starter-template/pkg/dto"
+import "github.com/yantology/simple-ecommerce/pkg/dto"
 
 // Returning a data response in a handler
 data := YourDataType{/* ... */}

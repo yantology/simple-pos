@@ -9,7 +9,8 @@
     - [Activation Tokens](#activation-tokens)
     - [Tenant](#tenant)
     - [Roles](#roles)
-    - [Tenant Users](#tenant-users)
+  - [Tenant Users](#tenant-users)
+    - [Categories](#categories)
     - [Products](#products)
     - [Invoices](#invoices)
     - [Invoice Items](#invoice-items)
@@ -137,6 +138,33 @@
 
 **Migration History:**
 - `20250404053712_create_tenant_users_table.up.sql` - Initial table creation
+
+### Categories
+
+**Table Name:** `categories`
+
+**Description:** Stores category information created by users for organizing products and other items.
+
+**Structure:**
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| id | SERIAL | no | auto_increment | Primary Key |
+| name | VARCHAR(255) | no | - | Category name (unique) |
+| user_id | INT | no | - | Foreign key to `users` |
+| created_at | TIMESTAMP | no | CURRENT_TIMESTAMP | Record creation time |
+| updated_at | TIMESTAMP | no | CURRENT_TIMESTAMP | Last updated time |
+
+**Index:**
+- PRIMARY KEY (`id`)
+- UNIQUE INDEX (`name`)
+- INDEX (`user_id`)
+
+**Relations:**
+- `user_id` references `users(id)` with `ON DELETE CASCADE`
+
+**Migration History:**
+- `20250424000001_create_categories_table.up.sql` - Initial table creation
 
 ### Products
 

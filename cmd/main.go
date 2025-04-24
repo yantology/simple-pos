@@ -12,11 +12,11 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/yantology/golang-starter-template/config"
-	_ "github.com/yantology/golang-starter-template/docs"
-	"github.com/yantology/golang-starter-template/pkg/jwt"
-	"github.com/yantology/golang-starter-template/pkg/resendutils"
-	"github.com/yantology/golang-starter-template/routes/auth"
+	"github.com/yantology/simple-ecommerce/config"
+	_ "github.com/yantology/simple-ecommerce/docs"
+	"github.com/yantology/simple-ecommerce/pkg/jwt"
+	"github.com/yantology/simple-ecommerce/pkg/resendutils"
+	"github.com/yantology/simple-ecommerce/routes/auth"
 )
 
 // initMigrations initializes and runs database migrations

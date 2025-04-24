@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/golang-starter-template/config"
+	"github.com/yantology/simple-ecommerce/config"
 )
 
 func TestInitDatabaseConfig(t *testing.T) {

@@ -47,4 +47,4 @@ Example: `20240115143022_create_users_table.up.sql`
 
 ## Creating or updating documentation Schema
 
- for guide please look #file:tabels-doc-prompt.md for intructuion and create on docs/shcema.md
+ <!-- for guide please look #file:tabels-doc-prompt.md for intructuion and create on ../docs/shcema.md -->

@@ -1,4 +1,4 @@
-module github.com/yantology/golang-starter-template
+module github.com/yantology/simple-ecommerce
 
 go 1.24.1
 

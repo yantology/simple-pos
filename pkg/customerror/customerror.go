@@ -24,6 +24,11 @@ func NewCustomError(original error, message string, httpCode int) *CustomError {
 }
 
 // Error implements the error interface
+func (ce *CustomError) Error() string {
+	return ce.message
+}
+
+// Message returns the error message
 func (ce *CustomError) Message() string {
 	return ce.message
 }

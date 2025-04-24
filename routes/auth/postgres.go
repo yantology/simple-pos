@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yantology/golang-starter-template/pkg/customerror"
+	"github.com/yantology/simple-ecommerce/pkg/customerror"
 )
 
 // Verify interface implementation
