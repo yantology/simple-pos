@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yantology/golang-starter-template/config"
+	"github.com/yantology/golang-starter-template/pkg/dto"
 	"github.com/yantology/golang-starter-template/pkg/resendutils"
 )
 
@@ -39,17 +40,17 @@ func NewAuthHandler(
 // @Produce json
 // @Param type path string true "Token type (registration or forget-password)"
 // @Param request body TokenRequest true "Token request parameters"
-// @Success 200 {object} MessageResponse
-// @Failure 400 {object} MessageResponse
-// @Failure 404 {object} MessageResponse
-// @Failure 409 {object} MessageResponse
+// @Success 200 {object} dto.MessageResponse
+// @Failure 400 {object} dto.MessageResponse
+// @Failure 404 {object} dto.MessageResponse
+// @Failure 409 {object} dto.MessageResponse
 // @Router /auth/token/{type} [post]
 func (h *authHandler) RequestToken(c *gin.Context) {
 	tokenType := c.Param("type")
 
 	// Validate token type
 	if tokenType != "registration" && tokenType != "forget-password" {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 
 			Message: "Tipe token tidak valid",
 		})
@@ -58,7 +59,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 
 	var req TokenRequest
 	if cuserr := c.ShouldBindJSON(&req); cuserr != nil {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 
 			Message: "Format request tidak valid",
 		})
@@ -67,7 +68,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 
 	// Validate email format
 	if cuserr := h.authService.ValidateEmail(req.Email); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -77,7 +78,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 	// Check if email exists based on token type
 	if tokenType == "registration" {
 		if cuserr := h.authRepository.CheckIsNotExistingEmail(req.Email); cuserr != nil {
-			c.JSON(http.StatusConflict, MessageResponse{
+			c.JSON(http.StatusConflict, dto.MessageResponse{
 
 				Message: "test 1 2 3",
 			})
@@ -85,7 +86,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 		}
 	} else if tokenType == "forget-password" {
 		if cuserr := h.authRepository.CheckIsExistingEmail(req.Email); cuserr != nil {
-			c.JSON(http.StatusNotFound, MessageResponse{
+			c.JSON(http.StatusNotFound, dto.MessageResponse{
 
 				Message: cuserr.Message(),
 			})
@@ -96,7 +97,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 	// Generate activation token
 	token, cuserr := h.authService.GenerateActivationToken()
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -106,7 +107,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 	// Hash the token before storing
 	hashedToken, cuserr := h.authService.HashString(token)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -122,7 +123,7 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 	}
 
 	if cuserr := h.authRepository.SaveActivationToken(tokenReq); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: "Gagal menyimpan token",
 		})
 		return
@@ -141,14 +142,14 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 
 	// Send email
 	if cuserr := h.emailSender.Send(emailHTML, emailSubject, []string{req.Email}); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, MessageResponse{
+	c.JSON(http.StatusOK, dto.MessageResponse{
 
 		Message: "Kode aktivasi telah dikirim ke email",
 	})
@@ -160,14 +161,14 @@ func (h *authHandler) RequestToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body RegisterRequest true "Registration details"
-// @Success 201 {object} MessageResponse
-// @Failure 400 {object} MessageResponse
-// @Failure 401 {object} MessageResponse
+// @Success 201 {object} dto.MessageResponse
+// @Failure 400 {object} dto.MessageResponse
+// @Failure 401 {object} dto.MessageResponse
 // @Router /auth/register [post]
 func (h *authHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if cuserr := c.ShouldBindJSON(&req); cuserr != nil {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 
 			Message: "Format request tidak valid",
 		})
@@ -183,7 +184,7 @@ func (h *authHandler) Register(c *gin.Context) {
 	}
 
 	if cuserr := h.authService.ValidateRegistrationInput(regReq); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: cuserr.Message(),
 		})
 		return
@@ -197,7 +198,7 @@ func (h *authHandler) Register(c *gin.Context) {
 
 	token, cuserr := h.authRepository.GetActivationToken(tokenReq)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: cuserr.Message(),
 		})
 		return
@@ -205,7 +206,7 @@ func (h *authHandler) Register(c *gin.Context) {
 
 	// Verify token
 	if cuserr := h.authService.VerifyHash(token, req.ActivationCode); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: cuserr.Message(),
 		})
 		return
@@ -214,7 +215,7 @@ func (h *authHandler) Register(c *gin.Context) {
 	// Hash password
 	hashedPassword, cuserr := h.authService.HashString(req.Password)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -229,14 +230,14 @@ func (h *authHandler) Register(c *gin.Context) {
 	}
 
 	if cuserr := h.authRepository.CreateUser(createUserReq); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, MessageResponse{
+	c.JSON(http.StatusCreated, dto.MessageResponse{
 		Message: "Pendaftaran berhasil, silakan login"})
 }
 
@@ -246,14 +247,14 @@ func (h *authHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "Login credentials"
-// @Success 200 {object} MessageResponse
-// @Failure 400 {object} MessageResponse
-// @Failure 401 {object} MessageResponse
+// @Success 200 {object} dto.MessageResponse
+// @Failure 400 {object} dto.MessageResponse
+// @Failure 401 {object} dto.MessageResponse
 // @Router /auth/login [post]
 func (h *authHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if cuserr := c.ShouldBindJSON(&req); cuserr != nil {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 
 			Message: "Format request tidak valid",
 		})
@@ -263,7 +264,7 @@ func (h *authHandler) Login(c *gin.Context) {
 	// Get user by email
 	user, cuserr := h.authRepository.GetUserByEmail(req.Email)
 	if cuserr != nil {
-		c.JSON(http.StatusUnauthorized, MessageResponse{
+		c.JSON(http.StatusUnauthorized, dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -272,7 +273,7 @@ func (h *authHandler) Login(c *gin.Context) {
 
 	// Verify password
 	if cuserr := h.authService.VerifyHash(user.PasswordHash, req.Password); cuserr != nil {
-		c.JSON(http.StatusUnauthorized, MessageResponse{
+		c.JSON(http.StatusUnauthorized, dto.MessageResponse{
 
 			Message: "hash tidak valid",
 		})
@@ -287,14 +288,14 @@ func (h *authHandler) Login(c *gin.Context) {
 
 	cuserr = h.authService.GenerateTokenPairCookies(c.Writer, tokenPairReq)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, MessageResponse{
+	c.JSON(http.StatusOK, dto.MessageResponse{
 		Message: "Login berhasil",
 	})
 }
@@ -305,14 +306,14 @@ func (h *authHandler) Login(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body ForgetPasswordRequest true "Password reset details"
-// @Success 200 {object} MessageResponse "Success response with message"
-// @Failure 400 {object} MessageResponse "Bad request response"
-// @Failure 401 {object} MessageResponse "Unauthorized response"
+// @Success 200 {object} dto.MessageResponse "Success response with message"
+// @Failure 400 {object} dto.MessageResponse "Bad request response"
+// @Failure 401 {object} dto.MessageResponse "Unauthorized response"
 // @Router /auth/forget-password [post]
 func (h *authHandler) ForgetPassword(c *gin.Context) {
 	var req ForgetPasswordRequest
 	if cuserr := c.ShouldBindJSON(&req); cuserr != nil {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 
 			Message: "Format request tidak valid",
 		})
@@ -321,7 +322,7 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 
 	// Validate password match
 	if cuserr := h.authService.ValidatePasswordInput(req.NewPassword, req.NewPasswordConfirmation); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -336,7 +337,7 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 
 	token, cuserr := h.authRepository.GetActivationToken(tokenReq)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: cuserr.Message(),
 		})
 		return
@@ -344,7 +345,7 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 
 	// Verify token
 	if cuserr := h.authService.VerifyHash(token, req.ActivationCode); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 			Message: cuserr.Message(),
 		})
 		return
@@ -353,7 +354,7 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 	// Hash new password
 	hashedPassword, cuserr := h.authService.HashString(req.NewPassword)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -367,14 +368,14 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 	}
 
 	if cuserr := h.authRepository.UpdateUserPassword(updateReq); cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, MessageResponse{
+	c.JSON(http.StatusOK, dto.MessageResponse{
 
 		Message: "Password berhasil diubah",
 	})
@@ -385,15 +386,15 @@ func (h *authHandler) ForgetPassword(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} MessageResponse
-// @Failure 400 {object} MessageResponse
-// @Failure 401 {object} MessageResponse
+// @Success 200 {object} dto.MessageResponse
+// @Failure 400 {object} dto.MessageResponse
+// @Failure 401 {object} dto.MessageResponse
 // @Router /auth/refresh-token [get]
 func (h *authHandler) RefreshToken(c *gin.Context) {
 	// Get refresh token from cookies
 	refreshToken, err := c.Cookie(h.tokenRequest.RefreshTokenName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, MessageResponse{
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
 			Message: "Refresh token tidak ditemukan dalam cookies",
 		})
 		return
@@ -402,7 +403,7 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 	// Validate refresh token
 	claims, cuserr := h.authService.ValidateRefreshTokenClaims(refreshToken)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
@@ -417,14 +418,14 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 	// Generate new access token
 	cuserr = h.authService.GenerateTokenPairCookies(c.Writer, tokenPair)
 	if cuserr != nil {
-		c.JSON(cuserr.Code(), MessageResponse{
+		c.JSON(cuserr.Code(), dto.MessageResponse{
 
 			Message: cuserr.Message(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, MessageResponse{
+	c.JSON(http.StatusOK, dto.MessageResponse{
 		Message: "Token berhasil diperbarui",
 	})
 }
@@ -434,12 +435,12 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} MessageResponse "Success response with message"
+// @Success 200 {object} dto.MessageResponse "Success response with message"
 // @Router /auth/logout [post]
 func (h *authHandler) Logout(c *gin.Context) {
 	h.authService.GenerateLogoutCookies(c.Writer)
 
-	c.JSON(http.StatusOK, MessageResponse{
+	c.JSON(http.StatusOK, dto.MessageResponse{
 		Message: "Logout berhasil",
 	})
 }

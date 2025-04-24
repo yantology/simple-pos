@@ -40,12 +40,6 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required" example:"eyJhbGciOiJIUzI1NiIs..."`
 }
 
-// MessageResponse represents a generic message response
-// @Description Generic message response model
-type MessageResponse struct {
-	Message string `json:"message" example:"Operation completed successfully"`
-}
-
 // JWTResponseData represents the JWT token response data
 // @Description JWT token response data model
 type JWTResponseData struct {
@@ -53,11 +47,4 @@ type JWTResponseData struct {
 	TokenType    string `json:"token_type" example:"Bearer"`
 	ExpiresIn    int    `json:"expires_in" example:"3600"`
 	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIs..."`
-}
-
-// DataResponse represents a generic data response
-// @Description Generic data response model
-type DataResponse[T any] struct {
-	Data    T      `json:"data"`
-	Message string `json:"message" example:"Operation completed successfully"`
 }
