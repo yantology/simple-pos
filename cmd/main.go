@@ -14,9 +14,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/yantology/simple-ecommerce/config"
 	_ "github.com/yantology/simple-ecommerce/docs"
+	"github.com/yantology/simple-ecommerce/middleware"
 	"github.com/yantology/simple-ecommerce/pkg/jwt"
 	"github.com/yantology/simple-ecommerce/pkg/resendutils"
 	"github.com/yantology/simple-ecommerce/routes/auth"
+	"github.com/yantology/simple-ecommerce/routes/category"
+	"github.com/yantology/simple-ecommerce/routes/order"
+	"github.com/yantology/simple-ecommerce/routes/product"
 )
 
 // initMigrations initializes and runs database migrations
@@ -102,7 +106,7 @@ func main() {
 	emailSender := resendutils.NewResendUtils(resendConfig.ApiKey, resendConfig.ResendDomain)
 
 	// Initialize Auth middleware
-	// authMiddleware := middleware.NewAuthMiddleware(jwtService, tokenConfig)
+	authMiddleware := middleware.NewAuthMiddleware(jwtService, tokenConfig)
 
 	// Initialize Gin router with CORS configuration
 	router := gin.Default()
@@ -119,6 +123,49 @@ func main() {
 		authService := auth.NewAuthService(jwtService, tokenConfig)
 		authHandler := auth.NewAuthHandler(authService, authRepo, emailSender, emailTemplate, tokenConfig)
 		authHandler.RegisterRoutes(v1)
+
+		// Category routes (protected by auth middleware)
+		categoryPostgres := category.NewPostgresRepository(db)           // Corrected: NewPostgresRepository
+		categoryRepo := category.NewCategoryRepository(categoryPostgres) // Corrected: NewCategoryRepository
+		categoryHandler := category.NewCategoryHandler(categoryRepo)
+		categoryGroup := v1.Group("/categories")
+		categoryGroup.Use(authMiddleware.AuthRequired()) // Apply auth middleware to all category routes
+		{
+			categoryGroup.GET("/", categoryHandler.GetAllCategories)
+			categoryGroup.GET("/:id", categoryHandler.GetCategoryByID)
+			categoryGroup.GET("/name/:name", categoryHandler.GetCategoryByName)
+			categoryGroup.POST("/", categoryHandler.CreateCategory)
+			categoryGroup.PUT("/:id", categoryHandler.UpdateCategory)
+			categoryGroup.DELETE("/:id", categoryHandler.DeleteCategory)
+		}
+
+		// Product routes (protected by auth middleware)
+		productPostgres := product.NewPostgresRepository(db)  // Corrected: NewPostgresRepository
+		productRepo := product.NewRepository(productPostgres) // Corrected: NewRepository
+		productHandler := product.NewHandler(productRepo)
+		productGroup := v1.Group("/products")
+		productGroup.Use(authMiddleware.AuthRequired()) // Apply auth middleware to all product routes
+		{
+			productGroup.POST("", productHandler.CreateProduct)
+			productGroup.GET("", productHandler.GetAllProducts) // Consider if this should be public or user-specific
+			productGroup.PUT("/:id", productHandler.UpdateProduct)
+			productGroup.DELETE("/:id", productHandler.DeleteProduct)
+			productGroup.GET("/user/:userID", productHandler.GetProductsByUserID) // Keep for admin/specific use, ensure proper authorization
+			productGroup.GET("/category/:categoryID", productHandler.GetProductsByCategoryID)
+		}
+
+		// Order routes (protected by auth middleware)
+		orderPostgres := order.NewPostgresRepository(db)     // Corrected: NewPostgresRepository
+		orderRepo := order.NewOrderRepository(orderPostgres) // Corrected: NewOrderRepository
+		orderHandler := order.NewOrderHandler(orderRepo)
+		orderGroup := v1.Group("/orders")
+		orderGroup.Use(authMiddleware.AuthRequired()) // Apply auth middleware to all order routes
+		{
+			orderGroup.GET("/", orderHandler.GetOrders)
+			orderGroup.GET("/:id", orderHandler.GetOrderByID)
+			orderGroup.POST("/", orderHandler.CreateOrder)
+			orderGroup.DELETE("/:id", orderHandler.DeleteOrder)
+		}
 
 	}
 

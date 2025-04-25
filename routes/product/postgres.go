@@ -2,9 +2,12 @@ package product
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"net/http"
+	"strconv" // Keep strconv for ID conversion where needed
 	"time"
+
+	"github.com/yantology/simple-ecommerce/pkg/customerror" // Import customerror
 )
 
 type PostgresRepository struct {
@@ -12,56 +15,38 @@ type PostgresRepository struct {
 }
 
 // NewPostgresRepository creates a new PostgresRepository instance
-func NewPostgresRepository(db *sql.DB) *PostgresRepository {
+func NewPostgresRepository(db *sql.DB) Repository {
 	return &PostgresRepository{
 		DB: db,
 	}
 }
 
-// Create adds a new product to the database
-func (r *PostgresRepository) Create(product Product) (Product, error) {
+// Create adds a new product to the database, associated with the UserID in the product struct
+func (r *PostgresRepository) Create(productData *CreateProduct, userID string) (*Product, *customerror.CustomError) { // Use CreateProduct from models.go
+	if productData == nil {
+		return nil, customerror.NewCustomError(nil, "productData is nil", http.StatusBadRequest)
+	}
+	// UserID is now expected to be set within the product struct by the handler
+	if userID == "" {
+		// This check might be redundant if the handler always sets it, but good for safety
+		return nil, customerror.NewCustomError(nil, "UserID is required to create a product", http.StatusBadRequest)
+	}
+
 	query := `
 		INSERT INTO products (name, price, is_available, category_id, user_id)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, name, price, is_available, category_id, user_id, created_at, updated_at
 	`
 
-	var createdProduct Product
+	var product Product
 	err := r.DB.QueryRow(
 		query,
-		product.Name,
-		product.Price,
-		product.IsAvailable,
-		product.CategoryID,
-		product.UserID,
+		productData.Name,        // Use productData
+		productData.Price,       // Use productData
+		productData.IsAvailable, // Use productData
+		productData.CategoryID,  // Use productData
+		userID,                  // Use UserID from the parameter
 	).Scan(
-		&createdProduct.ID,
-		&createdProduct.Name,
-		&createdProduct.Price,
-		&createdProduct.IsAvailable,
-		&createdProduct.CategoryID,
-		&createdProduct.UserID,
-		&createdProduct.CreatedAt,
-		&createdProduct.UpdatedAt,
-	)
-
-	if err != nil {
-		return Product{}, fmt.Errorf("failed to create product: %w", err)
-	}
-
-	return createdProduct, nil
-}
-
-// GetByID retrieves a product by its ID
-func (r *PostgresRepository) GetByID(id int) (Product, error) {
-	query := `
-		SELECT id, name, price, is_available, category_id, user_id, created_at, updated_at
-		FROM products
-		WHERE id = $1
-	`
-
-	var product Product
-	err := r.DB.QueryRow(query, id).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Price,
@@ -73,17 +58,15 @@ func (r *PostgresRepository) GetByID(id int) (Product, error) {
 	)
 
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return Product{}, fmt.Errorf("product with id %d not found", id)
-		}
-		return Product{}, fmt.Errorf("failed to get product: %w", err)
+		// Use NewPostgresError for database errors
+		return nil, customerror.NewPostgresError(err)
 	}
 
-	return product, nil
+	return &product, nil
 }
 
 // GetAll retrieves all products from the database
-func (r *PostgresRepository) GetAll() ([]Product, error) {
+func (r *PostgresRepository) GetAll() ([]*Product, *customerror.CustomError) { // Return *customerror.CustomError
 	query := `
 		SELECT id, name, price, is_available, category_id, user_id, created_at, updated_at
 		FROM products
@@ -92,13 +75,14 @@ func (r *PostgresRepository) GetAll() ([]Product, error) {
 
 	rows, err := r.DB.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query products: %w", err)
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
 	}
 	defer rows.Close()
 
-	var products []Product
+	var products []*Product // Change to []*Product
 	for rows.Next() {
-		var product Product
+		var product Product // Change to Product (not pointer)
 		if err := rows.Scan(
 			&product.ID,
 			&product.Name,
@@ -109,58 +93,48 @@ func (r *PostgresRepository) GetAll() ([]Product, error) {
 			&product.CreatedAt,
 			&product.UpdatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan product row: %w", err)
+			// Use NewPostgresError
+			return nil, customerror.NewPostgresError(err)
 		}
-		products = append(products, product)
+		products = append(products, &product) // Append pointer to product
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating product rows: %w", err)
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
 	}
 
 	return products, nil
 }
 
-// Update modifies an existing product in the database
-func (r *PostgresRepository) Update(id int, productUpdate UpdateProductRequest) (Product, error) {
-	// First check if the product exists
-	existingProduct, err := r.GetByID(id)
+// Update modifies an existing product in the database, checking ownership via userID
+func (r *PostgresRepository) Update(id, userID string, productUpdate *UpdateProduct) (*Product, *customerror.CustomError) { // Use UpdateProduct from models.go
+	if productUpdate == nil {
+		return nil, customerror.NewCustomError(nil, "productUpdate is nil", http.StatusBadRequest)
+	}
+	// Convert string ID to int for the query
+	productID, err := strconv.Atoi(id)
 	if err != nil {
-		return Product{}, err
-	}
-
-	// Update only the fields that are provided
-	if productUpdate.Name != "" {
-		existingProduct.Name = productUpdate.Name
-	}
-
-	if productUpdate.Price > 0 {
-		existingProduct.Price = productUpdate.Price
-	}
-
-	// IsAvailable is a boolean, so we'll always update it
-	existingProduct.IsAvailable = productUpdate.IsAvailable
-
-	if productUpdate.CategoryID > 0 {
-		existingProduct.CategoryID = productUpdate.CategoryID
+		return nil, customerror.NewCustomError(err, "invalid product ID format", http.StatusBadRequest)
 	}
 
 	query := `
 		UPDATE products
 		SET name = $1, price = $2, is_available = $3, category_id = $4, updated_at = $5
-		WHERE id = $6
+		WHERE id = $6 AND user_id = $7 -- Check both id and user_id
 		RETURNING id, name, price, is_available, category_id, user_id, created_at, updated_at
 	`
 
 	var updatedProduct Product
 	err = r.DB.QueryRow(
 		query,
-		existingProduct.Name,
-		existingProduct.Price,
-		existingProduct.IsAvailable,
-		existingProduct.CategoryID,
+		productUpdate.Name,        // Use productUpdate
+		productUpdate.Price,       // Use productUpdate
+		productUpdate.IsAvailable, // Use productUpdate
+		productUpdate.CategoryID,  // Use productUpdate
 		time.Now(),
-		id,
+		productID, // Use converted productID (int)
+		userID,    // Use userID (string) from parameter for authorization check
 	).Scan(
 		&updatedProduct.ID,
 		&updatedProduct.Name,
@@ -173,54 +147,69 @@ func (r *PostgresRepository) Update(id int, productUpdate UpdateProductRequest) 
 	)
 
 	if err != nil {
-		return Product{}, fmt.Errorf("failed to update product: %w", err)
+		// Handle not found/unauthorized specifically
+		if err == sql.ErrNoRows {
+			return nil, customerror.NewCustomError(nil, fmt.Sprintf("product with id %s not found or user not authorized", id), http.StatusNotFound)
+		}
+		// Use NewPostgresError for other database errors
+		return nil, customerror.NewPostgresError(err)
 	}
 
-	return updatedProduct, nil
+	return &updatedProduct, nil
 }
 
-// Delete removes a product from the database
-func (r *PostgresRepository) Delete(id int) error {
-	// First check if the product exists
-	_, err := r.GetByID(id)
+// Delete removes a product from the database, checking ownership via userID
+func (r *PostgresRepository) Delete(id, userID string) *customerror.CustomError { // Change id to string, add userID string
+	// Convert string ID to int
+	productID, err := strconv.Atoi(id)
 	if err != nil {
-		return err
+		return customerror.NewCustomError(err, "invalid product ID format", http.StatusBadRequest)
 	}
 
-	query := `DELETE FROM products WHERE id = $1`
-	result, err := r.DB.Exec(query, id)
+	// No need for a separate existence check, the DELETE query handles it with user_id
+	query := `DELETE FROM products WHERE id = $1 AND user_id = $2` // Check both id and user_id
+	result, err := r.DB.Exec(query, productID, userID)             // Use productID (int) and userID (string)
 	if err != nil {
-		return fmt.Errorf("failed to delete product: %w", err)
+		// Use NewPostgresError
+		return customerror.NewPostgresError(err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		// Use NewCustomError for non-database specific errors
+		return customerror.NewCustomError(err, "failed to get rows affected", http.StatusInternalServerError)
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("product with id %d not found", id)
+		// This means either the product didn't exist or the user didn't own it
+		return customerror.NewCustomError(nil, fmt.Sprintf("product with id %s not found or user not authorized to delete", id), http.StatusNotFound)
 	}
 
 	return nil
 }
 
 // GetByUserID retrieves all products created by a specific user
-func (r *PostgresRepository) GetByUserID(userID int) ([]Product, error) {
+func (r *PostgresRepository) GetByUserID(userID string) ([]*Product, *customerror.CustomError) { // userID is already string
+	// No need to convert userID, it's already a string from the handler/context
 	query := `
 		SELECT id, name, price, is_available, category_id, user_id, created_at, updated_at
 		FROM products
-		WHERE user_id = $1
+		WHERE user_id = $1 -- Use userID directly
 		ORDER BY id
 	`
 
-	rows, err := r.DB.Query(query, userID)
+	rows, err := r.DB.Query(query, userID) // Use userID (string)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query products by user ID: %w", err)
+		// Handle no rows specifically for clarity, although NewPostgresError might cover it
+		if err == sql.ErrNoRows {
+			return []*Product{}, nil // Return empty slice if no products found for user
+		}
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
 	}
 	defer rows.Close()
 
-	var products []Product
+	var products []*Product // Change to []*Product
 	for rows.Next() {
 		var product Product
 		if err := rows.Scan(
@@ -233,20 +222,26 @@ func (r *PostgresRepository) GetByUserID(userID int) ([]Product, error) {
 			&product.CreatedAt,
 			&product.UpdatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan product row: %w", err)
+			// Use NewPostgresError
+			return nil, customerror.NewPostgresError(err)
 		}
-		products = append(products, product)
+		products = append(products, &product) // Append pointer to product
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating product rows: %w", err)
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
+	}
+	// If loop finished without finding rows, products will be an empty slice
+	if products == nil {
+		return []*Product{}, nil // Ensure empty slice is returned, not nil
 	}
 
 	return products, nil
 }
 
 // GetByCategoryID retrieves all products in a specific category
-func (r *PostgresRepository) GetByCategoryID(categoryID int) ([]Product, error) {
+func (r *PostgresRepository) GetByCategoryID(categoryID int) ([]*Product, *customerror.CustomError) { // Return *customerror.CustomError and []*Product
 	query := `
 		SELECT id, name, price, is_available, category_id, user_id, created_at, updated_at
 		FROM products
@@ -256,11 +251,12 @@ func (r *PostgresRepository) GetByCategoryID(categoryID int) ([]Product, error) 
 
 	rows, err := r.DB.Query(query, categoryID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query products by category ID: %w", err)
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
 	}
 	defer rows.Close()
 
-	var products []Product
+	var products []*Product // Change to []*Product
 	for rows.Next() {
 		var product Product
 		if err := rows.Scan(
@@ -273,13 +269,15 @@ func (r *PostgresRepository) GetByCategoryID(categoryID int) ([]Product, error) 
 			&product.CreatedAt,
 			&product.UpdatedAt,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan product row: %w", err)
+			// Use NewPostgresError
+			return nil, customerror.NewPostgresError(err)
 		}
-		products = append(products, product)
+		products = append(products, &product) // Append pointer to product
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating product rows: %w", err)
+		// Use NewPostgresError
+		return nil, customerror.NewPostgresError(err)
 	}
 
 	return products, nil

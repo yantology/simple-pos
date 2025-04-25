@@ -1,31 +1,13 @@
 package product
 
-import (
-	"errors"
-)
-
-// Error definitions
-var (
-	ErrInvalidPrice = errors.New("price must be greater than zero")
-)
+import "github.com/yantology/simple-ecommerce/pkg/customerror"
 
 // Repository defines the interface for product data operations
 type Repository interface {
-	Create(product Product) (Product, error)
-	GetByID(id int) (Product, error)
-	GetAll() ([]Product, error)
-	Update(id int, product UpdateProductRequest) (Product, error)
-	Delete(id int) error
-	GetByUserID(userID int) ([]Product, error)
-	GetByCategoryID(categoryID int) ([]Product, error)
-}
-
-// Service defines the interface for product business logic
-// Service should only contain methods that don't require database access
-type Service interface {
-	ValidateProductInput(productRequest CreateProductRequest) error
-	PrepareProductForCreation(productRequest CreateProductRequest) Product
-	ValidateUpdateRequest(productRequest UpdateProductRequest) error
-	FormatProductsResponse(products []Product) ProductListResponse
-	FormatProductResponse(product Product) ProductResponse
+	Create(product *CreateProduct, userID string) (*Product, *customerror.CustomError) // Use CreateProduct from models.go
+	GetAll() ([]*Product, *customerror.CustomError)
+	Update(id, userID string, product *UpdateProduct) (*Product, *customerror.CustomError) // Use UpdateProduct from models.go
+	Delete(id, userID string) *customerror.CustomError                                     // Add userID
+	GetByUserID(userID string) ([]*Product, *customerror.CustomError)                      // userID is already string
+	GetByCategoryID(categoryID int) ([]*Product, *customerror.CustomError)
 }

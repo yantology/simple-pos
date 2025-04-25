@@ -1,47 +1,45 @@
 package product
 
+import "github.com/yantology/simple-ecommerce/pkg/customerror"
+
+// repository implements the Repository interface
 type repository struct {
-	postgres Repository
+	database Repository // Embed the database repository interface
 }
 
 // NewRepository creates a new repository instance
-func NewRepository(postgres Repository) Repository {
+func NewRepository(db Repository) Repository {
 	return &repository{
-		postgres: postgres,
+		database: db,
 	}
 }
 
-// Create adds a new product
-func (r *repository) Create(product Product) (Product, error) {
-	return r.postgres.Create(product)
+// Create calls the database Create method
+func (r *repository) Create(productData *CreateProduct, userID string) (*Product, *customerror.CustomError) { // Match updated interface signature
+	return r.database.Create(productData, userID) // Pass arguments according to updated interface
 }
 
-// GetByID retrieves a product by its ID
-func (r *repository) GetByID(id int) (Product, error) {
-	return r.postgres.GetByID(id)
+// GetAll calls the database GetAll method
+func (r *repository) GetAll() ([]*Product, *customerror.CustomError) {
+	return r.database.GetAll()
 }
 
-// GetAll retrieves all products
-func (r *repository) GetAll() ([]Product, error) {
-	return r.postgres.GetAll()
+// Update calls the database Update method
+func (r *repository) Update(id, userID string, product *UpdateProduct) (*Product, *customerror.CustomError) { // Match updated interface signature
+	return r.database.Update(id, userID, product) // Pass arguments according to updated interface
 }
 
-// Update modifies an existing product
-func (r *repository) Update(id int, product UpdateProductRequest) (Product, error) {
-	return r.postgres.Update(id, product)
+// Delete calls the database Delete method
+func (r *repository) Delete(id, userID string) *customerror.CustomError {
+	return r.database.Delete(id, userID) // Pass userID
 }
 
-// Delete removes a product
-func (r *repository) Delete(id int) error {
-	return r.postgres.Delete(id)
+// GetByUserID calls the database GetByUserID method
+func (r *repository) GetByUserID(userID string) ([]*Product, *customerror.CustomError) {
+	return r.database.GetByUserID(userID)
 }
 
-// GetByUserID retrieves all products by a specific user
-func (r *repository) GetByUserID(userID int) ([]Product, error) {
-	return r.postgres.GetByUserID(userID)
-}
-
-// GetByCategoryID retrieves all products in a specific category
-func (r *repository) GetByCategoryID(categoryID int) ([]Product, error) {
-	return r.postgres.GetByCategoryID(categoryID)
+// GetByCategoryID calls the database GetByCategoryID method
+func (r *repository) GetByCategoryID(categoryID int) ([]*Product, *customerror.CustomError) {
+	return r.database.GetByCategoryID(categoryID)
 }

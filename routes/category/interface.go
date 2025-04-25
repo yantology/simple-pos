@@ -4,20 +4,15 @@ import "github.com/yantology/simple-ecommerce/pkg/customerror"
 
 // Repository defines the data access methods for categories
 type Repository interface {
-	GetCategoryByID(id int) (*Category, *customerror.CustomError)
-	GetCategoryByName(name string) (*Category, *customerror.CustomError)
-	GetCategoriesByUserID(userID int) ([]Category, *customerror.CustomError)
-	CreateCategory(category *CreateCategoryRequest) (*Category, *customerror.CustomError)
-	UpdateCategory(id int, category *UpdateCategoryRequest) (*Category, *customerror.CustomError)
-	DeleteCategory(id int) *customerror.CustomError
-}
-
-// Service defines the business logic operations for categories that don't require database access
-type Service interface {
-	ValidateCategoryID(id int) *customerror.CustomError
-	ValidateCategoryName(name string) *customerror.CustomError
-	ValidateUserID(userID int) *customerror.CustomError
-	ValidateCreateCategoryRequest(category *CreateCategoryRequest) *customerror.CustomError
-	ValidateUpdateCategoryRequest(id int, category *UpdateCategoryRequest) *customerror.CustomError
-	CheckOwnership(categoryUserID, requestUserID int) *customerror.CustomError
+	GetAllCategoriesByUserID(userID string) ([]Category, *customerror.CustomError) // Add method to get all categories by user ID
+	// GetCategoryByID now requires userID for authorization
+	GetCategoryByID(id string, userID string) (*Category, *customerror.CustomError)
+	// GetCategoryByName now requires userID for authorization
+	GetCategoryByName(name string, userID string) (*Category, *customerror.CustomError)
+	// CreateCategory now requires userID
+	CreateCategory(category *CreateCategory, userID string) (*Category, *customerror.CustomError) // Use CreateCategory from models.go, add userID
+	// UpdateCategory now requires userID for authorization
+	UpdateCategory(id string, userID string, category *UpdateCategoryRequest) (*Category, *customerror.CustomError) // Use UpdateCategoryRequest from models.go
+	// DeleteCategory now requires userID for authorization
+	DeleteCategory(id string, userID string) *customerror.CustomError
 }

@@ -1,34 +1,40 @@
 package product
 
-import (
-	"time"
-)
+import "time"
 
-// Product represents a product entity
+// ProductResponse represents the product data returned in API responses
+// @Description Product model
 type Product struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	Price       float64   `json:"price"`
-	IsAvailable bool      `json:"is_available"`
-	CategoryID  int       `json:"category_id"`
-	UserID      int       `json:"user_id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          string    `json:"id" example:"uuid-product-1"`
+	Name        string    `json:"name" example:"Laptop Pro"`
+	Price       float64   `json:"price" example:"15000000"`
+	IsAvailable bool      `json:"is_available" example:"true"`
+	CategoryID  string    `json:"category_id" example:"uuid-category-1"`
+	UserID      string    `json:"user_id" example:"uuid-user-1"`
+	CreatedAt   time.Time `json:"created_at" example:"2025-04-25T15:04:05Z07:00"`
+	UpdatedAt   time.Time `json:"updated_at" example:"2025-04-25T15:04:05Z07:00"`
 }
 
-// CreateProductRequest represents the data needed to create a new product
-type CreateProductRequest struct {
-	Name        string  `json:"name" binding:"required"`
-	Price       float64 `json:"price" binding:"required,gt=0"`
-	IsAvailable bool    `json:"is_available"`
-	CategoryID  int     `json:"category_id" binding:"required"`
-	UserID      int     `json:"user_id" binding:"required"`
+// ProductListResponse represents the response for listing products
+// @Description Product list response model
+type ProductList struct {
+	Products []Product `json:"products"`
 }
 
-// UpdateProductRequest represents the data needed to update an existing product
-type UpdateProductRequest struct {
-	Name        string  `json:"name"`
-	Price       float64 `json:"price" binding:"omitempty,gt=0"`
-	IsAvailable bool    `json:"is_available"`
-	CategoryID  int     `json:"category_id"`
+// UpdateProduct defines the structure for updating a product
+// @Description Update product request model
+type UpdateProduct struct {
+	Name        string  `json:"name" binding:"required" example:"Laptop Pro X"`
+	Price       float64 `json:"price" binding:"required,gt=0" example:"16500000"`
+	IsAvailable bool    `json:"is_available" example:"false"`
+	CategoryID  string  `json:"category_id" binding:"required" example:"uuid-category-2"`
+}
+
+// CreateProduct defines the structure for creating a new product
+// @Description Create product request model
+type CreateProduct struct {
+	Name        string  `json:"name" binding:"required" example:"Wireless Mouse"`
+	Price       float64 `json:"price" binding:"required,gt=0" example:"250000"`
+	IsAvailable bool    `json:"is_available" example:"true"`
+	CategoryID  string  `json:"category_id" binding:"required" example:"uuid-category-1"`
 }

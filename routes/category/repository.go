@@ -8,36 +8,36 @@ type CategoryRepository struct {
 }
 
 // NewCategoryRepository creates a new repository instance
-func NewCategoryRepository(postgres Repository) *CategoryRepository {
+func NewCategoryRepository(postgres Repository) Repository {
 	return &CategoryRepository{postgres: postgres}
 }
 
-// GetCategoryByID retrieves a category by its ID
-func (r *CategoryRepository) GetCategoryByID(id int) (*Category, *customerror.CustomError) {
-	return r.postgres.GetCategoryByID(id)
+// GetAllCategoriesByUserID retrieves all categories for a specific user
+func (r *CategoryRepository) GetAllCategoriesByUserID(userID string) ([]Category, *customerror.CustomError) {
+	return r.postgres.GetAllCategoriesByUserID(userID)
 }
 
-// GetCategoryByName retrieves a category by its name
-func (r *CategoryRepository) GetCategoryByName(name string) (*Category, *customerror.CustomError) {
-	return r.postgres.GetCategoryByName(name)
+// GetCategoryByID retrieves a category by its ID and user ID
+func (r *CategoryRepository) GetCategoryByID(id string, userID string) (*Category, *customerror.CustomError) {
+	return r.postgres.GetCategoryByID(id, userID)
 }
 
-// GetCategoriesByUserID retrieves all categories created by a specific user
-func (r *CategoryRepository) GetCategoriesByUserID(userID int) ([]Category, *customerror.CustomError) {
-	return r.postgres.GetCategoriesByUserID(userID)
+// GetCategoryByName retrieves a category by its name and user ID
+func (r *CategoryRepository) GetCategoryByName(name string, userID string) (*Category, *customerror.CustomError) {
+	return r.postgres.GetCategoryByName(name, userID)
 }
 
 // CreateCategory creates a new category
-func (r *CategoryRepository) CreateCategory(category *CreateCategoryRequest) (*Category, *customerror.CustomError) {
-	return r.postgres.CreateCategory(category)
+func (r *CategoryRepository) CreateCategory(category *CreateCategory, userID string) (*Category, *customerror.CustomError) {
+	return r.postgres.CreateCategory(category, userID)
 }
 
-// UpdateCategory updates an existing category
-func (r *CategoryRepository) UpdateCategory(id int, category *UpdateCategoryRequest) (*Category, *customerror.CustomError) {
-	return r.postgres.UpdateCategory(id, category)
+// UpdateCategory updates an existing category, passing userID for authorization
+func (r *CategoryRepository) UpdateCategory(id string, userID string, category *UpdateCategoryRequest) (*Category, *customerror.CustomError) {
+	return r.postgres.UpdateCategory(id, userID, category)
 }
 
-// DeleteCategory deletes a category by ID
-func (r *CategoryRepository) DeleteCategory(id int) *customerror.CustomError {
-	return r.postgres.DeleteCategory(id)
+// DeleteCategory deletes a category by ID, passing userID for authorization
+func (r *CategoryRepository) DeleteCategory(id string, userID string) *customerror.CustomError {
+	return r.postgres.DeleteCategory(id, userID)
 }
