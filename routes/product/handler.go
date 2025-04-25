@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin" // Import middleware package
-	"github.com/yantology/simple-ecommerce/pkg/dto"
+	"github.com/yantology/simple-pos/pkg/dto"
 )
 
 // Handler holds the dependencies for the product handlers

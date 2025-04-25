@@ -1,6 +1,6 @@
 package product
 
-import "github.com/yantology/simple-ecommerce/pkg/customerror"
+import "github.com/yantology/simple-pos/pkg/customerror"
 
 // Repository defines the interface for product data operations
 type Repository interface {

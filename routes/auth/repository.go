@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/yantology/simple-ecommerce/pkg/customerror"
+import "github.com/yantology/simple-pos/pkg/customerror"
 
 type AuthRepository struct {
 	db AuthDBInterface

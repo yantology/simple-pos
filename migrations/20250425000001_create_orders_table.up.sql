@@ -1,4 +1,4 @@
--- filepath: c:\Users\LENOVO\Documents\golang\simple-ecommerce\migrations\20250425000001_create_orders_table.up.sql
+-- filepath: c:\Users\LENOVO\Documents\golang\simple-pos\migrations\20250425000001_create_orders_table.up.sql
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     total NUMERIC(12, 2) NOT NULL,

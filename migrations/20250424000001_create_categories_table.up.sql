@@ -1,4 +1,4 @@
--- filepath: c:\Users\LENOVO\Documents\golang\simple-ecommerce\migrations\20250424000001_create_categories_table.up.sql
+-- filepath: c:\Users\LENOVO\Documents\golang\simple-pos\migrations\20250424000001_create_categories_table.up.sql
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,

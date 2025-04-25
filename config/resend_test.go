@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/simple-ecommerce/config"
+	"github.com/yantology/simple-pos/config"
 )
 
 func TestInitResendConfig(t *testing.T) {

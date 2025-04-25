@@ -8,7 +8,7 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 func TestNewCustomError(t *testing.T) {

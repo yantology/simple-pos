@@ -12,15 +12,16 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/yantology/simple-ecommerce/config"
-	_ "github.com/yantology/simple-ecommerce/docs"
-	"github.com/yantology/simple-ecommerce/middleware"
-	"github.com/yantology/simple-ecommerce/pkg/jwt"
-	"github.com/yantology/simple-ecommerce/pkg/resendutils"
-	"github.com/yantology/simple-ecommerce/routes/auth"
-	"github.com/yantology/simple-ecommerce/routes/category"
-	"github.com/yantology/simple-ecommerce/routes/order"
-	"github.com/yantology/simple-ecommerce/routes/product"
+	"github.com/yantology/simple-pos/config"
+
+	// _ "github.com/yantology/simple-pos/docs"
+	"github.com/yantology/simple-pos/middleware"
+	"github.com/yantology/simple-pos/pkg/jwt"
+	"github.com/yantology/simple-pos/pkg/resendutils"
+	"github.com/yantology/simple-pos/routes/auth"
+	"github.com/yantology/simple-pos/routes/category"
+	"github.com/yantology/simple-pos/routes/order"
+	"github.com/yantology/simple-pos/routes/product"
 )
 
 // initMigrations initializes and runs database migrations

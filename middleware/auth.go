@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yantology/simple-ecommerce/config"
-	jwtPkg "github.com/yantology/simple-ecommerce/pkg/jwt"
+	"github.com/yantology/simple-pos/config"
+	jwtPkg "github.com/yantology/simple-pos/pkg/jwt"
 )
 
 // AuthMiddleware is a struct for authentication middleware

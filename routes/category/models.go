@@ -25,3 +25,10 @@ type CreateCategory struct {
 type UpdateCategoryRequest struct {
 	Name string `json:"name" binding:"required" example:"Home Goods"`
 }
+
+// DataResponse represents a generic data response
+// @Description Generic data response model
+type DataResponse[T any] struct {
+	Data    T      `json:"data"`
+	Message string `json:"message" example:"Operation completed successfully"`
+}

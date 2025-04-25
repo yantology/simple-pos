@@ -1,4 +1,4 @@
--- filepath: c:\Users\LENOVO\Documents\golang\simple-ecommerce\migrations\20250424000002_create_products_table.up.sql
+-- filepath: c:\Users\LENOVO\Documents\golang\simple-pos\migrations\20250424000002_create_products_table.up.sql
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,

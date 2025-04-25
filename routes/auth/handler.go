@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yantology/simple-ecommerce/config"
-	"github.com/yantology/simple-ecommerce/pkg/dto"
-	"github.com/yantology/simple-ecommerce/pkg/resendutils"
+	"github.com/yantology/simple-pos/config"
+	"github.com/yantology/simple-pos/pkg/dto"
+	"github.com/yantology/simple-pos/pkg/resendutils"
 )
 
 type authHandler struct {

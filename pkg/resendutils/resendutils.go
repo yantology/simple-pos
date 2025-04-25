@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/resend/resend-go/v2"
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 type ResendUtilsInterface interface {

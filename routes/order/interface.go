@@ -1,6 +1,6 @@
 package order
 
-import "github.com/yantology/simple-ecommerce/pkg/customerror"
+import "github.com/yantology/simple-pos/pkg/customerror"
 
 // OrderRepository interface for order data operations
 type OrderRepository interface {

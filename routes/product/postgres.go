@@ -7,7 +7,7 @@ import (
 	"strconv" // Keep strconv for ID conversion where needed
 	"time"
 
-	"github.com/yantology/simple-ecommerce/pkg/customerror" // Import customerror
+	"github.com/yantology/simple-pos/pkg/customerror" // Import customerror
 )
 
 type PostgresRepository struct {

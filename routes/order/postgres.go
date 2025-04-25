@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 type postgresRepository struct {

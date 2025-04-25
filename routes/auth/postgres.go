@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 // Verify interface implementation

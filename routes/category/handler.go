@@ -3,9 +3,8 @@ package category
 import (
 	"net/http"
 
-	"github.com/yantology/simple-ecommerce/pkg/dto"
-
 	"github.com/gin-gonic/gin"
+	"github.com/yantology/simple-pos/pkg/dto"
 )
 
 // CategoryHandler handles HTTP requests for categories
@@ -14,6 +13,7 @@ type CategoryHandler struct {
 }
 
 // NewCategoryHandler creates a new handler instance
+// S
 func NewCategoryHandler(repository Repository) *CategoryHandler {
 	return &CategoryHandler{
 		repository: repository,
@@ -21,6 +21,7 @@ func NewCategoryHandler(repository Repository) *CategoryHandler {
 }
 
 // RegisterRoutes registers category routes to the router
+// @Summary Register routes with authentication
 func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 	categoryGroup := router.Group("/categories")
 	{
@@ -33,51 +34,12 @@ func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 	}
 }
 
-// @Summary Get all categories for the authenticated user
-// @Description Retrieves a list of all categories associated with the logged-in user.
-// @Tags categories
-// @Accept json
-// @Produce json
-// @Success 200 {object} dto.DataResponse[[]Category]
-// @Failure 400 {object} dto.MessageResponse "Invalid request data"
-// @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
-// @Failure 500 {object} dto.MessageResponse "Internal Server Error"
-// @Router /categories [get]
-func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
-	// Get userID from middleware context
-	userIDVal, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.MessageResponse{Message: "Unauthorized: User ID not found in context"})
-		return
-	}
-
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
-		return
-	}
-
-	// Direct repository call to get all categories for the user
-	categories, customErr := h.repository.GetAllCategoriesByUserID(userID)
-	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{
-			Message: customErr.Message(),
-		})
-		return
-	}
-	// Use the Category struct directly from models.go
-	c.JSON(http.StatusOK, dto.DataResponse[[]Category]{
-		Data:    categories,
-		Message: "Categories retrieved successfully",
-	})
-}
-
 // @Summary Get category by ID
 // @Description Retrieves a specific category by its ID for the authenticated user.
 // @Tags categories
 // @Produce json
 // @Param id path string true "Category ID"
-// @Success 200 {object} dto.DataResponse[*category.Category] "Successfully retrieved categories"
+// @Success 200 {object} dto.DataResponse[Category] "Successfully retrieved categories"
 // @Failure 400 {object} dto.MessageResponse "Invalid category ID format (if applicable)"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
@@ -154,6 +116,45 @@ func (h *CategoryHandler) GetCategoryByName(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.DataResponse[*Category]{ // Use *Category
 		Data:    category,
 		Message: "Category retrieved successfully",
+	})
+}
+
+// @Summary Get all categories for the authenticated user
+// @Description Retrieves a list of all categories associated with the logged-in user.
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.DataResponse[[]Category]
+// @Failure 400 {object} dto.MessageResponse "Invalid request data"
+// @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
+// @Failure 500 {object} dto.MessageResponse "Internal Server Error"
+// @Router /categories [get]
+func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
+	// Get userID from middleware context
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.MessageResponse{Message: "Unauthorized: User ID not found in context"})
+		return
+	}
+
+	userID, ok := userIDVal.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+		return
+	}
+
+	// Direct repository call to get all categories for the user
+	categories, customErr := h.repository.GetAllCategoriesByUserID(userID)
+	if customErr != nil {
+		c.JSON(customErr.Code(), dto.MessageResponse{
+			Message: customErr.Message(),
+		})
+		return
+	}
+	// Use the Category struct directly from models.go
+	c.JSON(http.StatusOK, dto.DataResponse[[]Category]{
+		Data:    categories,
+		Message: "Categories retrieved successfully",
 	})
 }
 

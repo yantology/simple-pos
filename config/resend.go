@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 type ResendApi struct {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yantology/simple-ecommerce/pkg/customerror"
+	"github.com/yantology/simple-pos/pkg/customerror"
 )
 
 type JWTConfig struct {
