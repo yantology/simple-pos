@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -21,16 +22,13 @@ func NewHandler(repository Repository) *Handler {
 }
 
 // Routes sets up all the routes for product management
-func (h *Handler) Routes(router *gin.RouterGroup) {
-	productGroup := router.Group("/products")
-	{
-		productGroup.POST("", h.CreateProduct)
-		productGroup.GET("", h.GetAllProducts)
-		productGroup.PUT("/:id", h.UpdateProduct)
-		productGroup.DELETE("/:id", h.DeleteProduct)
-		productGroup.GET("/user/:userID", h.GetProductsByUserID) // Keep this route for admin/specific use cases if needed, but primary user access should rely on context userID
-		productGroup.GET("/category/:categoryID", h.GetProductsByCategoryID)
-	}
+func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
+
+	router.POST("", h.CreateProduct)
+	router.GET("", h.GetAllProducts)
+	router.PUT("/:id", h.UpdateProduct)
+	router.DELETE("/:id", h.DeleteProduct)
+	router.GET("/category/:categoryID", h.GetProductsByCategoryID)
 }
 
 // @Summary Create a new product
@@ -40,7 +38,7 @@ func (h *Handler) Routes(router *gin.RouterGroup) {
 // @Produce json
 // @Param product body CreateProduct true "Product details"
 // @Security ApiKeyAuth
-// @Success 201 {object} dto.DataResponse[*Product] "Product created successfully"
+// @Success 201 {object} Product "Product created successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -59,24 +57,27 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	fmt.Println("userIDVal:", userIDVal)
+
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Create the product entity, associating it with the authenticated user
 	// Pass the request directly as it matches CreateProduct struct now
-	createdProduct, customErr := h.repository.Create(&request, userID) // Pass the request and userID
+	createdProduct, customErr := h.repository.Create(&request, userID) // Pass int userID
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{Message: customErr.Message()})
+		c.JSON(customErr.Code(), dto.MessageResponse{
+			Message: customErr.Message(),
+		})
 		return
 	}
 
 	// No need to format, createdProduct is already *Product
 	c.JSON(http.StatusCreated, dto.DataResponse[*Product]{ // Use *Product
-		Data:    createdProduct,
-		Message: "Product created successfully",
+		Data: createdProduct,
 	})
 }
 
@@ -84,7 +85,7 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 // @Description Retrieves a list of all products available in the system. (No user filtering currently)
 // @Tags products
 // @Produce json
-// @Success 200 {object} dto.DataResponse[[]*Product] "Successfully retrieved products"
+// @Success 200 {object} []Product "Successfully retrieved products"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
 // @Router /products [get]
 func (h *Handler) GetAllProducts(c *gin.Context) {
@@ -100,8 +101,7 @@ func (h *Handler) GetAllProducts(c *gin.Context) {
 
 	// Products are already []*Product, no need for formatting
 	c.JSON(http.StatusOK, dto.DataResponse[[]*Product]{ // Use []*Product
-		Data:    products,
-		Message: "Products retrieved successfully",
+		Data: products,
 	})
 }
 
@@ -110,10 +110,10 @@ func (h *Handler) GetAllProducts(c *gin.Context) {
 // @Tags products
 // @Accept json
 // @Produce json
-// @Param id path string true "Product ID"
+// @Param id path int true "Product ID" // Changed param type to int
 // @Param product body UpdateProduct true "Updated product details"
 // @Security ApiKeyAuth
-// @Success 200 {object} dto.DataResponse[*Product] "Product updated successfully"
+// @Success 200 {object} Product "Product updated successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data or ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
 // @Failure 404 {object} dto.MessageResponse "Product not found"
@@ -121,6 +121,11 @@ func (h *Handler) GetAllProducts(c *gin.Context) {
 // @Router /products/{id} [put]
 func (h *Handler) UpdateProduct(c *gin.Context) {
 	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam) // Convert idParam to int
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid product ID format"})
+		return
+	}
 
 	var request UpdateProduct // Use UpdateProduct from models.go
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -135,23 +140,24 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Pass idParam, userID and the request directly
-	updatedProduct, customErr := h.repository.Update(idParam, userID, &request)
+	updatedProduct, customErr := h.repository.Update(id, userID, &request) // Pass int id and userID
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{Message: customErr.Message()})
+		c.JSON(customErr.Code(), dto.MessageResponse{
+			Message: customErr.Message(),
+		})
 		return
 	}
 
 	// No need to format, updatedProduct is already *Product
 	c.JSON(http.StatusOK, dto.DataResponse[*Product]{ // Use *Product
-		Data:    updatedProduct,
-		Message: "Product updated successfully",
+		Data: updatedProduct,
 	})
 }
 
@@ -159,7 +165,7 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 // @Description Deletes a product by its ID. User must own the product.
 // @Tags products
 // @Produce json
-// @Param id path string true "Product ID"
+// @Param id path int true "Product ID" // Changed param type to int
 // @Security ApiKeyAuth
 // @Success 200 {object} dto.MessageResponse "Product deleted successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid product ID format"
@@ -169,6 +175,11 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 // @Router /products/{id} [delete]
 func (h *Handler) DeleteProduct(c *gin.Context) {
 	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam) // Convert idParam to int
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid product ID format"})
+		return
+	}
 
 	// Get userID from middleware context
 	userIDVal, exists := c.Get("user_id")
@@ -177,67 +188,30 @@ func (h *Handler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Pass idParam and userID for authorization check in repository
-	customErr := h.repository.Delete(idParam, userID)
+	customErr := h.repository.Delete(id, userID) // Pass int id and userID
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{Message: customErr.Message()})
+		c.JSON(customErr.Code(), dto.MessageResponse{
+			Message: customErr.Message(),
+		})
 		return
 	}
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Product deleted successfully"})
 }
 
-// @Summary Get products by User ID
-// @Description Retrieves all products associated with a specific User ID. (Requires appropriate authorization)
-// @Tags products
-// @Produce json
-// @Param userID path string true "User ID"
-// @Security ApiKeyAuth // Assuming admin or specific permissions needed
-// @Success 200 {object} dto.DataResponse[[]*Product] "Successfully retrieved products"
-// @Failure 400 {object} dto.MessageResponse "Invalid User ID format"
-// @Failure 401 {object} dto.MessageResponse "Unauthorized"
-// @Failure 500 {object} dto.MessageResponse "Internal Server Error"
-// @Router /products/user/{userID} [get]
-func (h *Handler) GetProductsByUserID(c *gin.Context) {
-	// This route uses the userID from the URL parameter.
-	// If you want the currently logged-in user's products, use the context userID.
-	targetUserID := c.Param("userID") // Get target userID from URL
-
-	// Optional: Add logic here to check if the requesting user (from context)
-	// has permission to view products of the targetUserID.
-	// For example:
-	// requestingUserIDVal, exists := c.Get("user_id")
-	// if !exists || requestingUserIDVal.(string) != targetUserID { // Basic check: only allow users to see their own products via this route
-	//     // Or check if requesting user is an admin
-	//     c.JSON(http.StatusForbidden, dto.MessageResponse{Message: "Forbidden"})
-	// 	   return
-	// }
-
-	products, customErr := h.repository.GetByUserID(targetUserID) // Use targetUserID from URL
-	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{Message: customErr.Message()})
-		return
-	}
-
-	// Products are already []*Product, no need for formatting
-	c.JSON(http.StatusOK, dto.DataResponse[[]*Product]{ // Use []*Product
-		Data:    products,
-		Message: "Products retrieved successfully for user",
-	})
-}
-
 // @Summary Get products by Category ID
 // @Description Retrieves all products belonging to a specific Category ID.
 // @Tags products
 // @Produce json
-// @Param categoryID path string true "Category ID"
-// @Success 200 {object} dto.DataResponse[[]*Product] "Successfully retrieved products"
+// @Param categoryID path int true "Category ID" // Changed param type to int
+// @Success 200 {object} []Product "Successfully retrieved products"
 // @Failure 400 {object} dto.MessageResponse "Invalid Category ID format"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
 // @Router /products/category/{categoryID} [get]
@@ -245,19 +219,20 @@ func (h *Handler) GetProductsByCategoryID(c *gin.Context) {
 	categoryIDParam := c.Param("categoryID")
 	categoryID, err := strconv.Atoi(categoryIDParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid category ID format"})
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid Category ID format"})
 		return
 	}
 
 	products, customErr := h.repository.GetByCategoryID(categoryID)
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{Message: customErr.Message()})
+		c.JSON(customErr.Code(), dto.MessageResponse{
+			Message: customErr.Message(),
+		})
 		return
 	}
 
 	// Products are already []*Product, no need for formatting
 	c.JSON(http.StatusOK, dto.DataResponse[[]*Product]{ // Use []*Product
-		Data:    products,
-		Message: "Products retrieved successfully for category",
+		Data: products,
 	})
 }

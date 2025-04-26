@@ -2,6 +2,7 @@ package category
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yantology/simple-pos/pkg/dto"
@@ -23,23 +24,22 @@ func NewCategoryHandler(repository Repository) *CategoryHandler {
 // RegisterRoutes registers category routes to the router
 // @Summary Register routes with authentication
 func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
-	categoryGroup := router.Group("/categories")
-	{
-		categoryGroup.GET("/", h.GetAllCategories) // Add route for getting all categories
-		categoryGroup.GET("/:id", h.GetCategoryByID)
-		categoryGroup.GET("/name/:name", h.GetCategoryByName)
-		categoryGroup.POST("/", h.CreateCategory)
-		categoryGroup.PUT("/:id", h.UpdateCategory)
-		categoryGroup.DELETE("/:id", h.DeleteCategory)
-	}
+
+	router.GET("/", h.GetAllCategories) // Add route for getting all categories
+	router.GET("/:id", h.GetCategoryByID)
+	router.GET("/name/:name", h.GetCategoryByName)
+	router.POST("/", h.CreateCategory)
+	router.PUT("/:id", h.UpdateCategory)
+	router.DELETE("/:id", h.DeleteCategory)
+
 }
 
 // @Summary Get category by ID
 // @Description Retrieves a specific category by its ID for the authenticated user.
 // @Tags categories
 // @Produce json
-// @Param id path string true "Category ID"
-// @Success 200 {object} dto.DataResponse[Category] "Successfully retrieved categories"
+// @Param id path int true "Category ID"
+// @Success 200 {object} Category "Successfully retrieved categories"
 // @Failure 400 {object} dto.MessageResponse "Invalid category ID format (if applicable)"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
@@ -47,6 +47,11 @@ func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 // @Router /categories/{id} [get]
 func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid category ID format"})
+		return
+	}
 
 	// Get userID from middleware context
 	userIDVal, exists := c.Get("user_id")
@@ -55,14 +60,14 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Direct repository call, passing userID for authorization
-	category, customErr := h.repository.GetCategoryByID(idStr, userID)
+	category, customErr := h.repository.GetCategoryByID(id, userID)
 	if customErr != nil {
 		c.JSON(customErr.Code(), dto.MessageResponse{
 			Message: customErr.Message(),
@@ -72,8 +77,7 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 
 	// Use the Category struct directly from models.go
 	c.JSON(http.StatusOK, dto.DataResponse[*Category]{ // Use *Category
-		Data:    category,
-		Message: "Category retrieved successfully",
+		Data: category,
 	})
 }
 
@@ -82,7 +86,7 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 // @Tags categories
 // @Produce json
 // @Param name path string true "Category Name"
-// @Success 200 {object} dto.DataResponse[*category.Category] "Successfully retrieved categories"
+// @Success 200 {object} Category "Successfully retrieved categories"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -97,16 +101,16 @@ func (h *CategoryHandler) GetCategoryByName(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Direct repository call, passing userID for authorization
 	category, customErr := h.repository.GetCategoryByName(name, userID)
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{ // Use MessageResponse for consistency
+		c.JSON(customErr.Code(), dto.MessageResponse{
 			Message: customErr.Message(),
 		})
 		return
@@ -114,8 +118,7 @@ func (h *CategoryHandler) GetCategoryByName(c *gin.Context) {
 
 	// Use the Category struct directly from models.go
 	c.JSON(http.StatusOK, dto.DataResponse[*Category]{ // Use *Category
-		Data:    category,
-		Message: "Category retrieved successfully",
+		Data: category,
 	})
 }
 
@@ -124,7 +127,7 @@ func (h *CategoryHandler) GetCategoryByName(c *gin.Context) {
 // @Tags categories
 // @Accept json
 // @Produce json
-// @Success 200 {object} dto.DataResponse[[]Category]
+// @Success 200 {object} []Category
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -137,9 +140,9 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
@@ -153,8 +156,7 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 	}
 	// Use the Category struct directly from models.go
 	c.JSON(http.StatusOK, dto.DataResponse[[]Category]{
-		Data:    categories,
-		Message: "Categories retrieved successfully",
+		Data: categories,
 	})
 }
 
@@ -164,7 +166,7 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category body category.CreateCategory true "Category details"
-// @Success 201 {object} dto.DataResponse[*category.Category] "Successfully retrieved categories"
+// @Success 201 {object} Category "Successfully retrieved categories"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 409 {object} dto.MessageResponse "Category with this name already exists"
@@ -172,11 +174,8 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 // @Router /categories [post]
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var request CreateCategory // Use CreateCategory from models.go
-
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.MessageResponse{ // Use MessageResponse
-			Message: "Invalid request data: " + err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid request data: " + err.Error()})
 		return
 	}
 
@@ -187,16 +186,16 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Direct repository call, passing the request struct and userID
 	category, customErr := h.repository.CreateCategory(&request, userID)
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{ // Use MessageResponse
+		c.JSON(customErr.Code(), dto.MessageResponse{
 			Message: customErr.Message(),
 		})
 		return
@@ -204,8 +203,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 	// Use the Category struct directly from models.go
 	c.JSON(http.StatusCreated, dto.DataResponse[*Category]{ // Use *Category
-		Data:    category,
-		Message: "Category created successfully",
+		Data: category,
 	})
 }
 
@@ -214,9 +212,9 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // @Tags categories
 // @Accept json
 // @Produce json
-// @Param id path string true "Category ID"
+// @Param id path int true "Category ID"
 // @Param category body category.UpdateCategoryRequest true "Updated category details"
-// @Success 200 {object} dto.DataResponse[*category.Category] "Successfully retrieved categories"
+// @Success 200 {object} Category
 // @Failure 400 {object} dto.MessageResponse "Invalid request data or ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
@@ -225,12 +223,15 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // @Router /categories/{id} [put]
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid category ID format"})
+		return
+	}
 
 	var request UpdateCategoryRequest // Use UpdateCategoryRequest from models.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.MessageResponse{
-			Message: "Invalid request data: " + err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid request data: " + err.Error()})
 		return
 	}
 
@@ -241,16 +242,16 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Direct repository call, passing userID for authorization and the request struct
-	category, customErr := h.repository.UpdateCategory(idStr, userID, &request)
+	category, customErr := h.repository.UpdateCategory(id, userID, &request)
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{ // Use MessageResponse
+		c.JSON(customErr.Code(), dto.MessageResponse{
 			Message: customErr.Message(),
 		})
 		return
@@ -258,8 +259,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	// Use the Category struct directly from models.go
 	c.JSON(http.StatusOK, dto.DataResponse[*Category]{ // Use *Category
-		Data:    category,
-		Message: "Category updated successfully",
+		Data: category,
 	})
 }
 
@@ -267,8 +267,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Description Deletes a category by its ID for the authenticated user.
 // @Tags categories
 // @Produce json
-// @Param id path string true "Category ID"
-// @Success 200 {object} dto.MessageResponse "Category deleted successfully"
+// @Param id path int true "Category ID"
+// @Success 200 {object} Category
 // @Failure 400 {object} dto.MessageResponse "Invalid category ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
@@ -276,6 +276,11 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Router /categories/{id} [delete]
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{Message: "Invalid category ID format"})
+		return
+	}
 
 	// Get userID from middleware context
 	userIDVal, exists := c.Get("user_id")
@@ -284,16 +289,16 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not a string"})
+	userID, err := strconv.Atoi(userIDVal.(string)) // Assert userID as int
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.MessageResponse{Message: "Internal Server Error: User ID in context is not an integer"})
 		return
 	}
 
 	// Direct repository call, passing userID for authorization
-	customErr := h.repository.DeleteCategory(idStr, userID)
+	customErr := h.repository.DeleteCategory(id, userID)
 	if customErr != nil {
-		c.JSON(customErr.Code(), dto.MessageResponse{ // Use MessageResponse
+		c.JSON(customErr.Code(), dto.MessageResponse{
 			Message: customErr.Message(),
 		})
 		return

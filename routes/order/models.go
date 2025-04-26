@@ -1,30 +1,39 @@
 package order
 
-// ProductJSON represents the product information in an order
-// @Description Product details within an order
-type ProductJSON struct {
-	ID         string `json:"id" binding:"required" example:"uuid-product-1"`
-	Name       string `json:"name" binding:"required" example:"Laptop Pro"`
-	Quantity   int    `json:"quantity" binding:"required,min=1" example:"1"` // Ensure quantity is at least 1
-	Price      int    `json:"price" binding:"required,min=0" example:"15000000"`
-	Category   string `json:"category" binding:"required" example:"Electronics"`
-	TotalPrice int    `json:"total_price" binding:"required,min=0" example:"15000000"`
+import "time"
+
+// Product represents a product within an order
+type Product struct {
+	ID         int    `json:"id"` // Changed from string to int
+	Name       string `json:"name"`
+	Quantity   int    `json:"quantity"`
+	Price      int    `json:"price"`
+	Category   string `json:"category"`
+	TotalPrice int    `json:"total_price"`
 }
 
-// Order represents the order model
-// @Description Order model
+// Order represents the structure of an order in the database
 type Order struct {
-	ID        string      `json:"id" binding:"required" example:"uuid-order-1"`
-	Total     int         `json:"total" binding:"required,min=0" example:"15000000"`
-	Product   ProductJSON `json:"product" binding:"required"`
-	UserID    string      `json:"user_id" binding:"required" example:"uuid-user-1"`
-	CreatedAt string      `json:"created_at" binding:"required" example:"2025-04-25T15:04:05Z07:00"`
-	UpdatedAt string      `json:"updated_at" binding:"required" example:"2025-04-25T15:04:05Z07:00"`
+	ID        int       `json:"id"` // Changed from string to int
+	Total     float64   `json:"total"`
+	Product   []Product `json:"product"` // Reverted back to []Product
+	UserID    int       `json:"user_id"` // Changed from string to int
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// CreateOrderRequest represents the request to create a new order
-// @Description Create order request model
+// CreateOrder represents the data needed to create a new order
+// Note: Still accepts a single Product. Modify if API should accept multiple.
 type CreateOrder struct {
-	Total   int         `json:"total" binding:"required,min=0" example:"15000000"`
-	Product ProductJSON `json:"product" binding:"required"`
+	Total   float64   `json:"total"`
+	Product []Product `json:"product"`
+}
+
+// OrderResponse represents the data returned after creating an order
+type OrderResponse struct {
+	ID        int       `json:"id"` // Changed from string to int
+	Total     float64   `json:"total"`
+	Product   []Product `json:"product"` // Reverted back to []Product
+	UserID    int       `json:"user_id"` // Changed from string to int
+	CreatedAt time.Time `json:"created_at"`
 }

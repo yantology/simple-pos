@@ -7,9 +7,9 @@ import (
 // Category represents a category entity
 // @Description Category model
 type Category struct {
-	ID        string    `json:"id" binding:"required" example:"uuid-string-1"`
+	ID        int       `json:"id" binding:"required" example:"1"` // Changed from string to int
 	Name      string    `json:"name" binding:"required" example:"Electronics"`
-	UserID    string    `json:"user_id" binding:"required" example:"uuid-user-1"`
+	UserID    int       `json:"user_id" binding:"required" example:"1"` // Changed from string to int
 	CreatedAt time.Time `json:"created_at" binding:"required" example:"2025-04-25T15:04:05Z07:00"`
 	UpdatedAt time.Time `json:"updated_at" binding:"required" example:"2025-04-25T15:04:05Z07:00"`
 }

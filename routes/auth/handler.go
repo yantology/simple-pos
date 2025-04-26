@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yantology/simple-pos/config"
@@ -399,7 +400,6 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 		})
 		return
 	}
-
 	// Validate refresh token
 	claims, cuserr := h.authService.ValidateRefreshTokenClaims(refreshToken)
 	if cuserr != nil {
@@ -410,8 +410,17 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Convert claims.UserID from string to int
+	userID, err := strconv.Atoi(claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.MessageResponse{
+			Message: "Invalid user ID format",
+		})
+		return
+	}
+
 	tokenPair := TokenPairRequest{
-		UserID: claims.UserID,
+		UserID: userID,
 		Email:  claims.Email,
 	}
 

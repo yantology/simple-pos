@@ -141,12 +141,14 @@ func (s *authService) GenerateLogoutCookies(Writer http.ResponseWriter) {
 
 // GenerateTokenPair generates an access token and refresh token pair
 func (s *authService) GenerateTokenPairCookies(Writer http.ResponseWriter, req TokenPairRequest) *customerror.CustomError {
-	accessToken, err := s.jwtService.GenerateAccesToken(req.UserID, req.Email)
+	userID := fmt.Sprintf("%d", req.UserID) // Convert int to string
+
+	accessToken, err := s.jwtService.GenerateAccesToken(userID, req.Email)
 	if err != nil {
 		return customerror.NewCustomError(err, "Gagal membuat access token", http.StatusInternalServerError)
 	}
 
-	refreshToken, err := s.jwtService.GenerateRefreshToken(req.UserID, req.Email)
+	refreshToken, err := s.jwtService.GenerateRefreshToken(userID, req.Email)
 	if err != nil {
 		return customerror.NewCustomError(err, "Gagal membuat refresh token", http.StatusInternalServerError)
 	}

@@ -19,7 +19,7 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 }
 
 // GetAllCategoriesByUserID retrieves all categories created by a specific user
-func (r *PostgresRepository) GetAllCategoriesByUserID(userID string) ([]Category, *customerror.CustomError) {
+func (r *PostgresRepository) GetAllCategoriesByUserID(userID int) ([]Category, *customerror.CustomError) { // Changed userID to int
 	query := `SELECT id, name, user_id, created_at, updated_at FROM categories WHERE user_id = $1 ORDER BY name`
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
@@ -61,7 +61,7 @@ func (r *PostgresRepository) GetAllCategoriesByUserID(userID string) ([]Category
 }
 
 // GetCategoryByID retrieves a category by its ID and user ID
-func (r *PostgresRepository) GetCategoryByID(id string, userID string) (*Category, *customerror.CustomError) {
+func (r *PostgresRepository) GetCategoryByID(id int, userID int) (*Category, *customerror.CustomError) { // Changed id and userID to int
 	query := `SELECT id, name, user_id, created_at, updated_at FROM categories WHERE id = $1 AND user_id = $2`
 	row := r.db.QueryRow(query, id, userID)
 
@@ -82,7 +82,7 @@ func (r *PostgresRepository) GetCategoryByID(id string, userID string) (*Categor
 }
 
 // GetCategoryByName retrieves a category by its name and user ID
-func (r *PostgresRepository) GetCategoryByName(name string, userID string) (*Category, *customerror.CustomError) {
+func (r *PostgresRepository) GetCategoryByName(name string, userID int) (*Category, *customerror.CustomError) { // Changed userID to int
 	query := `SELECT id, name, user_id, created_at, updated_at FROM categories WHERE name = $1 AND user_id = $2`
 	row := r.db.QueryRow(query, name, userID)
 
@@ -103,7 +103,7 @@ func (r *PostgresRepository) GetCategoryByName(name string, userID string) (*Cat
 }
 
 // CreateCategory creates a new category
-func (r *PostgresRepository) CreateCategory(categoryData *CreateCategory, userID string) (*Category, *customerror.CustomError) { // Use CreateCategory, add userID
+func (r *PostgresRepository) CreateCategory(categoryData *CreateCategory, userID int) (*Category, *customerror.CustomError) { // Changed userID to int
 	var newCategory Category
 
 	query := `INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING id, name, user_id, created_at, updated_at`
@@ -123,7 +123,7 @@ func (r *PostgresRepository) CreateCategory(categoryData *CreateCategory, userID
 }
 
 // UpdateCategory updates an existing category, ensuring the user owns it
-func (r *PostgresRepository) UpdateCategory(id string, userID string, categoryUpdate *UpdateCategoryRequest) (*Category, *customerror.CustomError) { // Use UpdateCategoryRequest
+func (r *PostgresRepository) UpdateCategory(id int, userID int, categoryUpdate *UpdateCategoryRequest) (*Category, *customerror.CustomError) { // Changed id and userID to int
 	query := `UPDATE categories SET name = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING id, name, user_id, created_at, updated_at`
 	row := r.db.QueryRow(query, categoryUpdate.Name, id, userID) // Use categoryUpdate.Name
 
@@ -148,7 +148,7 @@ func (r *PostgresRepository) UpdateCategory(id string, userID string, categoryUp
 }
 
 // DeleteCategory deletes a category by its ID, ensuring the user owns it
-func (r *PostgresRepository) DeleteCategory(id string, userID string) *customerror.CustomError {
+func (r *PostgresRepository) DeleteCategory(id int, userID int) *customerror.CustomError { // Changed id and userID to int
 	query := `DELETE FROM categories WHERE id = $1 AND user_id = $2`
 	result, err := r.db.Exec(query, id, userID)
 	if err != nil {

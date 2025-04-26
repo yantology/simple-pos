@@ -15,7 +15,7 @@ func NewRepository(db Repository) Repository {
 }
 
 // Create calls the database Create method
-func (r *repository) Create(productData *CreateProduct, userID string) (*Product, *customerror.CustomError) { // Match updated interface signature
+func (r *repository) Create(productData *CreateProduct, userID int) (*Product, *customerror.CustomError) { // Changed userID to int
 	return r.database.Create(productData, userID) // Pass arguments according to updated interface
 }
 
@@ -25,18 +25,13 @@ func (r *repository) GetAll() ([]*Product, *customerror.CustomError) {
 }
 
 // Update calls the database Update method
-func (r *repository) Update(id, userID string, product *UpdateProduct) (*Product, *customerror.CustomError) { // Match updated interface signature
+func (r *repository) Update(id int, userID int, product *UpdateProduct) (*Product, *customerror.CustomError) { // Changed id and userID to int
 	return r.database.Update(id, userID, product) // Pass arguments according to updated interface
 }
 
 // Delete calls the database Delete method
-func (r *repository) Delete(id, userID string) *customerror.CustomError {
+func (r *repository) Delete(id int, userID int) *customerror.CustomError { // Changed id and userID to int
 	return r.database.Delete(id, userID) // Pass userID
-}
-
-// GetByUserID calls the database GetByUserID method
-func (r *repository) GetByUserID(userID string) ([]*Product, *customerror.CustomError) {
-	return r.database.GetByUserID(userID)
 }
 
 // GetByCategoryID calls the database GetByCategoryID method

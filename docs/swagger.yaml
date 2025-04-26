@@ -1,0 +1,943 @@
+basePath: /api/v1
+definitions:
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_order_Order:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/routes_order.Order'
+        type: array
+    type: object
+  github_com_yantology_simple-pos_pkg_dto.MessageResponse:
+    description: Generic message response model
+    properties:
+      message:
+        example: Operation completed successfully
+        type: string
+    type: object
+  routes_auth.ForgetPasswordRequest:
+    description: Password reset request model
+    properties:
+      activation_code:
+        example: "123456"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      new_password:
+        example: newSecurePassword123
+        type: string
+      new_password_confirmation:
+        example: newSecurePassword123
+        type: string
+    required:
+    - activation_code
+    - email
+    - new_password
+    - new_password_confirmation
+    type: object
+  routes_auth.LoginRequest:
+    description: Login request model
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: securePassword123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  routes_auth.RegisterRequest:
+    description: Registration request model
+    properties:
+      activation_code:
+        example: "123456"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      fullname:
+        example: John Doe
+        type: string
+      password:
+        example: securePassword123
+        type: string
+      password_confirmation:
+        example: securePassword123
+        type: string
+    required:
+    - activation_code
+    - email
+    - fullname
+    - password
+    - password_confirmation
+    type: object
+  routes_auth.TokenRequest:
+    description: Token request model
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
+    type: object
+  routes_category.Category:
+    description: Category model
+    properties:
+      created_at:
+        example: 2025-04-25T15:04:05Z07:00
+        type: string
+      id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+      name:
+        example: Electronics
+        type: string
+      updated_at:
+        example: 2025-04-25T15:04:05Z07:00
+        type: string
+      user_id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+    required:
+    - created_at
+    - id
+    - name
+    - updated_at
+    - user_id
+    type: object
+  routes_category.CreateCategory:
+    description: Create category request model
+    properties:
+      name:
+        example: Groceries
+        type: string
+    required:
+    - name
+    type: object
+  routes_category.UpdateCategoryRequest:
+    description: Update category request model
+    properties:
+      name:
+        example: Home Goods
+        type: string
+    required:
+    - name
+    type: object
+  routes_order.CreateOrder:
+    properties:
+      product:
+        items:
+          $ref: '#/definitions/routes_order.Product'
+        type: array
+      total:
+        type: number
+    type: object
+  routes_order.Order:
+    properties:
+      created_at:
+        type: string
+      id:
+        description: Changed from string to int
+        type: integer
+      product:
+        description: Reverted back to []Product
+        items:
+          $ref: '#/definitions/routes_order.Product'
+        type: array
+      total:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        description: Changed from string to int
+        type: integer
+    type: object
+  routes_order.Product:
+    properties:
+      category:
+        type: string
+      id:
+        description: Changed from string to int
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      quantity:
+        type: integer
+      total_price:
+        type: integer
+    type: object
+  routes_product.CreateProduct:
+    description: Create product request model
+    properties:
+      category_id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+      is_available:
+        example: true
+        type: boolean
+      name:
+        example: Wireless Mouse
+        type: string
+      price:
+        example: 250000
+        type: number
+    required:
+    - category_id
+    - name
+    - price
+    type: object
+  routes_product.Product:
+    description: Product model
+    properties:
+      category_id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+      created_at:
+        example: 2025-04-25T15:04:05Z07:00
+        type: string
+      id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+      is_available:
+        example: true
+        type: boolean
+      name:
+        example: Laptop Pro
+        type: string
+      price:
+        example: 15000000
+        type: number
+      updated_at:
+        example: 2025-04-25T15:04:05Z07:00
+        type: string
+      user_id:
+        description: Changed from string to int
+        example: 1
+        type: integer
+    type: object
+  routes_product.UpdateProduct:
+    description: Update product request model
+    properties:
+      category_id:
+        description: Changed from string to int
+        example: 2
+        type: integer
+      is_available:
+        example: false
+        type: boolean
+      name:
+        example: Laptop Pro X
+        type: string
+      price:
+        example: 16500000
+        type: number
+    required:
+    - category_id
+    - name
+    - price
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a retail management system server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Retail Pro API
+  version: "1.0"
+paths:
+  /auth/forget-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset user password using activation code
+      parameters:
+      - description: Password reset details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/routes_auth.ForgetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with message
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Bad request response
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: Unauthorized response
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Reset password
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/routes_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: User login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Clear user authentication cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with message
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: User logout
+      tags:
+      - auth
+  /auth/refresh-token:
+    get:
+      consumes:
+      - application/json
+      description: Get new access token using refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Refresh token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with activation code
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/routes_auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Register new user
+      tags:
+      - auth
+  /auth/token/{type}:
+    post:
+      consumes:
+      - application/json
+      description: Request a token for registration or password reset
+      parameters:
+      - description: Token type (registration or forget-password)
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: Token request parameters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/routes_auth.TokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Request activation token
+      tags:
+      - auth
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all categories associated with the logged-in
+        user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/routes_category.Category'
+            type: array
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get all categories for the authenticated user
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new category for the authenticated user.
+      parameters:
+      - description: Category details
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/routes_category.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully retrieved categories
+          schema:
+            $ref: '#/definitions/routes_category.Category'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "409":
+          description: Category with this name already exists
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Create a new category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      description: Deletes a category by its ID for the authenticated user.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes_category.Category'
+        "400":
+          description: Invalid category ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Category not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Delete a category
+      tags:
+      - categories
+    get:
+      description: Retrieves a specific category by its ID for the authenticated user.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved categories
+          schema:
+            $ref: '#/definitions/routes_category.Category'
+        "400":
+          description: Invalid category ID format (if applicable)
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Category not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get category by ID
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing category by its ID for the authenticated user.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated category details
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/routes_category.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes_category.Category'
+        "400":
+          description: Invalid request data or ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Category not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "409":
+          description: Category with this name already exists
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Update an existing category
+      tags:
+      - categories
+  /categories/name/{name}:
+    get:
+      description: Retrieves a specific category by its name for the authenticated
+        user.
+      parameters:
+      - description: Category Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved categories
+          schema:
+            $ref: '#/definitions/routes_category.Category'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Category not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get category by name
+      tags:
+      - categories
+  /orders:
+    get:
+      description: Retrieves a list of all orders associated with the logged-in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved orders
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_order_Order'
+        "400":
+          description: User ID is required
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get all orders for the authenticated user
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Creates a new order for the authenticated user.
+      parameters:
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/routes_order.CreateOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/routes_order.Order'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{id}:
+    delete:
+      description: Deletes an order by its ID for the authenticated user.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order deleted successfully
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Invalid order ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Delete an order
+      tags:
+      - orders
+    get:
+      description: Retrieves a specific order by its ID for the authenticated user.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved order
+          schema:
+            $ref: '#/definitions/routes_order.Order'
+        "400":
+          description: Invalid order ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: 'Internal Server Error: User ID in context is not a string'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get order by ID
+      tags:
+      - orders
+  /products:
+    get:
+      description: Retrieves a list of all products available in the system. (No user
+        filtering currently)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved products
+          schema:
+            items:
+              $ref: '#/definitions/routes_product.Product'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product associated with the authenticated user.
+      parameters:
+      - description: Product details
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/routes_product.CreateProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product created successfully
+          schema:
+            $ref: '#/definitions/routes_product.Product'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      description: Deletes a product by its ID. User must own the product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted successfully
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "400":
+          description: Invalid product ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a product
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product by its ID. User must own the product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated product details
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/routes_product.UpdateProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product updated successfully
+          schema:
+            $ref: '#/definitions/routes_product.Product'
+        "400":
+          description: Invalid request data or ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "401":
+          description: 'Unauthorized: User ID not found in context or not owner'
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update an existing product
+      tags:
+      - products
+  /products/category/{categoryID}:
+    get:
+      description: Retrieves all products belonging to a specific Category ID.
+      parameters:
+      - description: Category ID
+        in: path
+        name: categoryID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved products
+          schema:
+            items:
+              $ref: '#/definitions/routes_product.Product'
+            type: array
+        "400":
+          description: Invalid Category ID format
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Get products by Category ID
+      tags:
+      - products
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

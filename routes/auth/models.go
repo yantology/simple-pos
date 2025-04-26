@@ -4,7 +4,7 @@ import "time"
 
 // TokenPairRequest represents the input parameters for generating token pairs
 type TokenPairRequest struct {
-	UserID string
+	UserID int
 	Email  string
 }
 
@@ -18,7 +18,7 @@ type RegistrationRequest struct {
 
 // User represents the user data structure from database
 type User struct {
-	ID           string
+	ID           int
 	Email        string
 	Fullname     string
 	PasswordHash string

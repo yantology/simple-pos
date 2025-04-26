@@ -5,12 +5,12 @@ import "time"
 // ProductResponse represents the product data returned in API responses
 // @Description Product model
 type Product struct {
-	ID          string    `json:"id" example:"uuid-product-1"`
+	ID          int       `json:"id" example:"1"` // Changed from string to int
 	Name        string    `json:"name" example:"Laptop Pro"`
 	Price       float64   `json:"price" example:"15000000"`
 	IsAvailable bool      `json:"is_available" example:"true"`
-	CategoryID  string    `json:"category_id" example:"uuid-category-1"`
-	UserID      string    `json:"user_id" example:"uuid-user-1"`
+	CategoryID  int       `json:"category_id" example:"1"` // Changed from string to int
+	UserID      int       `json:"user_id" example:"1"`     // Changed from string to int
 	CreatedAt   time.Time `json:"created_at" example:"2025-04-25T15:04:05Z07:00"`
 	UpdatedAt   time.Time `json:"updated_at" example:"2025-04-25T15:04:05Z07:00"`
 }
@@ -27,7 +27,7 @@ type UpdateProduct struct {
 	Name        string  `json:"name" binding:"required" example:"Laptop Pro X"`
 	Price       float64 `json:"price" binding:"required,gt=0" example:"16500000"`
 	IsAvailable bool    `json:"is_available" example:"false"`
-	CategoryID  string  `json:"category_id" binding:"required" example:"uuid-category-2"`
+	CategoryID  int     `json:"category_id" binding:"required" example:"2"` // Changed from string to int
 }
 
 // CreateProduct defines the structure for creating a new product
@@ -36,5 +36,5 @@ type CreateProduct struct {
 	Name        string  `json:"name" binding:"required" example:"Wireless Mouse"`
 	Price       float64 `json:"price" binding:"required,gt=0" example:"250000"`
 	IsAvailable bool    `json:"is_available" example:"true"`
-	CategoryID  string  `json:"category_id" binding:"required" example:"uuid-category-1"`
+	CategoryID  int     `json:"category_id" binding:"required" example:"1"` // Changed from string to int
 }

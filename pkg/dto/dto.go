@@ -3,8 +3,7 @@ package dto
 // DataResponse represents a generic data response
 // @Description Generic data response model
 type DataResponse[T any] struct {
-	Data    T      `json:"data"`
-	Message string `json:"message" example:"Operation completed successfully"`
+	Data T `json:"data"`
 }
 
 // MessageResponse represents a generic message response
