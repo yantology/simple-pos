@@ -296,10 +296,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/routes_category.Category"
-                            }
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_category_Category"
                         }
                     },
                     "400": {
@@ -349,7 +346,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Successfully retrieved categories",
                         "schema": {
-                            "$ref": "#/definitions/routes_category.Category"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category"
                         }
                     },
                     "400": {
@@ -402,7 +399,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved categories",
                         "schema": {
-                            "$ref": "#/definitions/routes_category.Category"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category"
                         }
                     },
                     "401": {
@@ -449,7 +446,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved categories",
                         "schema": {
-                            "$ref": "#/definitions/routes_category.Category"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category"
                         }
                     },
                     "400": {
@@ -661,9 +658,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Order created successfully",
                         "schema": {
-                            "$ref": "#/definitions/routes_order.Order"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order"
                         }
                     },
                     "400": {
@@ -710,7 +707,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved order",
                         "schema": {
-                            "$ref": "#/definitions/routes_order.Order"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order"
                         }
                     },
                     "400": {
@@ -805,10 +802,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved products",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/routes_product.Product"
-                            }
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product"
                         }
                     },
                     "500": {
@@ -820,11 +814,6 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Creates a new product associated with the authenticated user.",
                 "consumes": [
                     "application/json"
@@ -898,10 +887,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved products",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/routes_product.Product"
-                            }
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product"
                         }
                     },
                     "400": {
@@ -921,11 +907,6 @@ const docTemplate = `{
         },
         "/products/{id}": {
             "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Updates an existing product by its ID. User must own the product.",
                 "consumes": [
                     "application/json"
@@ -959,7 +940,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Product updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/routes_product.Product"
+                            "$ref": "#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_product_Product"
                         }
                     },
                     "400": {
@@ -989,28 +970,6 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Deletes a product by its ID. User must own the product.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Delete a product",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Product deleted successfully",
@@ -1047,6 +1006,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_category_Category": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/routes_category.Category"
+                    }
+                }
+            }
+        },
         "github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_order_Order": {
             "type": "object",
             "properties": {
@@ -1055,6 +1025,41 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/routes_order.Order"
                     }
+                }
+            }
+        },
+        "github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/routes_product.Product"
+                    }
+                }
+            }
+        },
+        "github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/routes_category.Category"
+                }
+            }
+        },
+        "github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/routes_order.Order"
+                }
+            }
+        },
+        "github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_product_Product": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/routes_product.Product"
                 }
             }
         },

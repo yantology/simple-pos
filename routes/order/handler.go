@@ -36,7 +36,7 @@ func NewOrderHandler(repository OrderRepository) *orderHandler {
 // @Description Retrieves a list of all orders associated with the logged-in user.
 // @Tags orders
 // @Produce json
-// @Success 200 {object} dto.DataResponse[[]order.Order] "Successfully retrieved orders"
+// @Success 200 {object} dto.DataResponse[[]Order] "Successfully retrieved orders"
 // @Failure 400 {object} dto.MessageResponse "User ID is required"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -77,7 +77,7 @@ func (h *orderHandler) GetOrders(c *gin.Context) {
 // @Tags orders
 // @Produce json
 // @Param id path int true "Order ID"
-// @Success 200 {object} Order "Successfully retrieved order"
+// @Success 200 {object} dto.DataResponse[Order] "Successfully retrieved order"
 // @Failure 400 {object} dto.MessageResponse "Invalid order ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
 // @Failure 404 {object} dto.MessageResponse "Order not found"
@@ -127,7 +127,7 @@ func (h *orderHandler) GetOrderByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param order body CreateOrder true "Order details"
-// @Success 201 {object} Order
+// @Success 201 {object} dto.DataResponse[Order] "Order created successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"

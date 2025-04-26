@@ -37,7 +37,6 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param product body CreateProduct true "Product details"
-// @Security ApiKeyAuth
 // @Success 201 {object} Product "Product created successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
@@ -85,7 +84,7 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 // @Description Retrieves a list of all products available in the system. (No user filtering currently)
 // @Tags products
 // @Produce json
-// @Success 200 {object} []Product "Successfully retrieved products"
+// @Success 200 {object} dto.DataResponse[[]Product] "Successfully retrieved products"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
 // @Router /products [get]
 func (h *Handler) GetAllProducts(c *gin.Context) {
@@ -112,8 +111,7 @@ func (h *Handler) GetAllProducts(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Product ID" // Changed param type to int
 // @Param product body UpdateProduct true "Updated product details"
-// @Security ApiKeyAuth
-// @Success 200 {object} Product "Product updated successfully"
+// @Success 200 {object} dto.DataResponse[Product] "Product updated successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data or ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
 // @Failure 404 {object} dto.MessageResponse "Product not found"
@@ -166,7 +164,7 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 // @Tags products
 // @Produce json
 // @Param id path int true "Product ID" // Changed param type to int
-// @Security ApiKeyAuth
+
 // @Success 200 {object} dto.MessageResponse "Product deleted successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid product ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"
@@ -211,7 +209,7 @@ func (h *Handler) DeleteProduct(c *gin.Context) {
 // @Tags products
 // @Produce json
 // @Param categoryID path int true "Category ID" // Changed param type to int
-// @Success 200 {object} []Product "Successfully retrieved products"
+// @Success 200 {object} dto.DataResponse[[]Product] "Successfully retrieved products"
 // @Failure 400 {object} dto.MessageResponse "Invalid Category ID format"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
 // @Router /products/category/{categoryID} [get]

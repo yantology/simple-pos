@@ -1,11 +1,40 @@
 basePath: /api/v1
 definitions:
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_category_Category:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/routes_category.Category'
+        type: array
+    type: object
   github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_order_Order:
     properties:
       data:
         items:
           $ref: '#/definitions/routes_order.Order'
         type: array
+    type: object
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/routes_product.Product'
+        type: array
+    type: object
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category:
+    properties:
+      data:
+        $ref: '#/definitions/routes_category.Category'
+    type: object
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order:
+    properties:
+      data:
+        $ref: '#/definitions/routes_order.Order'
+    type: object
+  github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_product_Product:
+    properties:
+      data:
+        $ref: '#/definitions/routes_product.Product'
     type: object
   github_com_yantology_simple-pos_pkg_dto.MessageResponse:
     description: Generic message response model
@@ -438,9 +467,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/routes_category.Category'
-            type: array
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_category_Category'
         "400":
           description: Invalid request data
           schema:
@@ -473,7 +500,7 @@ paths:
         "201":
           description: Successfully retrieved categories
           schema:
-            $ref: '#/definitions/routes_category.Category'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category'
         "400":
           description: Invalid request data
           schema:
@@ -542,7 +569,7 @@ paths:
         "200":
           description: Successfully retrieved categories
           schema:
-            $ref: '#/definitions/routes_category.Category'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category'
         "400":
           description: Invalid category ID format (if applicable)
           schema:
@@ -624,7 +651,7 @@ paths:
         "200":
           description: Successfully retrieved categories
           schema:
-            $ref: '#/definitions/routes_category.Category'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_category_Category'
         "401":
           description: 'Unauthorized: User ID not found in context'
           schema:
@@ -680,9 +707,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Order created successfully
           schema:
-            $ref: '#/definitions/routes_order.Order'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order'
         "400":
           description: Invalid request data
           schema:
@@ -747,7 +774,7 @@ paths:
         "200":
           description: Successfully retrieved order
           schema:
-            $ref: '#/definitions/routes_order.Order'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_order_Order'
         "400":
           description: Invalid order ID format
           schema:
@@ -777,9 +804,7 @@ paths:
         "200":
           description: Successfully retrieved products
           schema:
-            items:
-              $ref: '#/definitions/routes_product.Product'
-            type: array
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product'
         "500":
           description: Internal Server Error
           schema:
@@ -817,22 +842,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
-      security:
-      - ApiKeyAuth: []
       summary: Create a new product
       tags:
       - products
   /products/{id}:
     delete:
-      description: Deletes a product by its ID. User must own the product.
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
       responses:
         "200":
           description: Product deleted successfully
@@ -854,11 +868,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a product
-      tags:
-      - products
     put:
       consumes:
       - application/json
@@ -881,7 +890,7 @@ paths:
         "200":
           description: Product updated successfully
           schema:
-            $ref: '#/definitions/routes_product.Product'
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-routes_product_Product'
         "400":
           description: Invalid request data or ID format
           schema:
@@ -898,8 +907,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
-      security:
-      - ApiKeyAuth: []
       summary: Update an existing product
       tags:
       - products
@@ -918,9 +925,7 @@ paths:
         "200":
           description: Successfully retrieved products
           schema:
-            items:
-              $ref: '#/definitions/routes_product.Product'
-            type: array
+            $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.DataResponse-array_routes_product_Product'
         "400":
           description: Invalid Category ID format
           schema:

@@ -39,7 +39,7 @@ func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 // @Tags categories
 // @Produce json
 // @Param id path int true "Category ID"
-// @Success 200 {object} Category "Successfully retrieved categories"
+// @Success 200 {object} dto.DataResponse[Category] "Successfully retrieved categories"
 // @Failure 400 {object} dto.MessageResponse "Invalid category ID format (if applicable)"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
@@ -86,7 +86,7 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 // @Tags categories
 // @Produce json
 // @Param name path string true "Category Name"
-// @Success 200 {object} Category "Successfully retrieved categories"
+// @Success 200 {object} dto.DataResponse[Category] "Successfully retrieved categories"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 404 {object} dto.MessageResponse "Category not found"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -127,7 +127,7 @@ func (h *CategoryHandler) GetCategoryByName(c *gin.Context) {
 // @Tags categories
 // @Accept json
 // @Produce json
-// @Success 200 {object} []Category
+// @Success 200 {object} dto.DataResponse[[]Category]
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 500 {object} dto.MessageResponse "Internal Server Error"
@@ -166,7 +166,7 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param category body category.CreateCategory true "Category details"
-// @Success 201 {object} Category "Successfully retrieved categories"
+// @Success 201 {object} dto.DataResponse[Category] "Successfully retrieved categories"
 // @Failure 400 {object} dto.MessageResponse "Invalid request data"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context"
 // @Failure 409 {object} dto.MessageResponse "Category with this name already exists"
