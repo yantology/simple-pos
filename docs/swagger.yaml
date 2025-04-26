@@ -847,6 +847,15 @@ paths:
       - products
   /products/{id}:
     delete:
+      description: Deletes a product by its ID. User must own the product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
         "200":
           description: Product deleted successfully
@@ -868,6 +877,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_yantology_simple-pos_pkg_dto.MessageResponse'
+      summary: Delete a product
+      tags:
+      - products
     put:
       consumes:
       - application/json

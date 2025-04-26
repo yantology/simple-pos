@@ -164,7 +164,6 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 // @Tags products
 // @Produce json
 // @Param id path int true "Product ID" // Changed param type to int
-
 // @Success 200 {object} dto.MessageResponse "Product deleted successfully"
 // @Failure 400 {object} dto.MessageResponse "Invalid product ID format"
 // @Failure 401 {object} dto.MessageResponse "Unauthorized: User ID not found in context or not owner"

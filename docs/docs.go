@@ -970,6 +970,23 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "description": "Deletes a product by its ID. User must own the product.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Delete a product",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Product deleted successfully",
