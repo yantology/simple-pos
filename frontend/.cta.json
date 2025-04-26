@@ -1,0 +1,15 @@
+{
+  "framework": "react",
+  "projectName": "tanstack-router-starter-template",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "bun",
+  "toolchain": "none",
+  "mode": "file-router",
+  "git": true,
+  "variableValues": {},
+  "version": 1,
+  "existingAddOns": [
+    "shadcn"
+  ]
+}
