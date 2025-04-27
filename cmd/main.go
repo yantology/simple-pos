@@ -127,28 +127,27 @@ func main() {
 
 		authGroup := v1
 		authGroup.Use(authMiddleware.AuthRequired())
-		{
-			// Category routes (protected by auth middleware)
-			categoryPostgres := category.NewPostgresRepository(db)           // Corrected: NewPostgresRepository
-			categoryRepo := category.NewCategoryRepository(categoryPostgres) // Corrected: NewCategoryRepository
-			categoryHandler := category.NewCategoryHandler(categoryRepo)
-			categoryGroup := authGroup.Group("/categories")
-			categoryHandler.RegisterRoutes(categoryGroup)
 
-			// Product routes (protected by auth middleware)
-			productPostgres := product.NewPostgresRepository(db)  // Corrected: NewPostgresRepository
-			productRepo := product.NewRepository(productPostgres) // Corrected: NewRepository
-			productHandler := product.NewHandler(productRepo)
-			productGroup := authGroup.Group("/products")
-			productHandler.RegisterRoutes(productGroup)
+		// Category routes (protected by auth middleware)
+		categoryPostgres := category.NewPostgresRepository(db)           // Corrected: NewPostgresRepository
+		categoryRepo := category.NewCategoryRepository(categoryPostgres) // Corrected: NewCategoryRepository
+		categoryHandler := category.NewCategoryHandler(categoryRepo)
+		categoryGroup := authGroup.Group("/categories")
+		categoryHandler.RegisterRoutes(categoryGroup)
 
-			// Order routes (protected by auth middleware)
-			orderPostgres := order.NewPostgresRepository(db)     // Corrected: NewPostgresRepository
-			orderRepo := order.NewOrderRepository(orderPostgres) // Corrected: NewOrderRepository
-			orderHandler := order.NewOrderHandler(orderRepo)
-			orderGroup := authGroup.Group("/orders")
-			orderHandler.RegisterRoutes(orderGroup)
-		}
+		// Product routes (protected by auth middleware)
+		productPostgres := product.NewPostgresRepository(db)  // Corrected: NewPostgresRepository
+		productRepo := product.NewRepository(productPostgres) // Corrected: NewRepository
+		productHandler := product.NewHandler(productRepo)
+		productGroup := authGroup.Group("/products")
+		productHandler.RegisterRoutes(productGroup)
+
+		// Order routes (protected by auth middleware)
+		orderPostgres := order.NewPostgresRepository(db)     // Corrected: NewPostgresRepository
+		orderRepo := order.NewOrderRepository(orderPostgres) // Corrected: NewOrderRepository
+		orderHandler := order.NewOrderHandler(orderRepo)
+		orderGroup := authGroup.Group("/orders")
+		orderHandler.RegisterRoutes(orderGroup)
 
 	}
 

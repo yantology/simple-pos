@@ -24,14 +24,12 @@ func NewCategoryHandler(repository Repository) *CategoryHandler {
 // RegisterRoutes registers category routes to the router
 // @Summary Register routes with authentication
 func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
-
 	router.GET("/", h.GetAllCategories) // Add route for getting all categories
 	router.GET("/:id", h.GetCategoryByID)
 	router.GET("/name/:name", h.GetCategoryByName)
 	router.POST("/", h.CreateCategory)
 	router.PUT("/:id", h.UpdateCategory)
 	router.DELETE("/:id", h.DeleteCategory)
-
 }
 
 // @Summary Get category by ID
