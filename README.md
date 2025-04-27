@@ -1,5 +1,5 @@
 # retail-pro-be
-retail pro backend with golang and gin
+simple-pos backend with golang and gin
 
 ## Environment Configuration
 
