@@ -1,4 +1,4 @@
-# retail-pro-be
+# simple-pos
 
 simple-pos backend with golang and gin
 
