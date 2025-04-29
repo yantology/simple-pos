@@ -1,5 +1,8 @@
 # retail-pro-be
+
 simple-pos backend with golang and gin
+
+support Swagger API
 
 ## Environment Configuration
 
