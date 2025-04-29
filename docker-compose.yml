@@ -1,4 +1,15 @@
 services:
+  app:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-8000}:8000" # Use APP_PORT from .env, default to 8000 if not set
+    depends_on:
+      - db
+    networks:
+      - retail-pro
   adminer:
     image: adminer
     restart: always

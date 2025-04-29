@@ -39,3 +39,5 @@ cp .env.example .env
 - `RESEND_API_KEY`: Resend API key
 - `RESEND_DOMAIN`: Email domain
 - `RESEND_NAME`: Sender name
+
+## How 
