@@ -1,0 +1,19 @@
+# Abaikan file environment lokal
+.env
+.env.*
+!.env.example
+
+# Abaikan direktori Git
+.git
+
+# Abaikan node_modules (jika ada frontend/build step Node.js)
+node_modules
+
+# Abaikan file/folder spesifik OS
+.DS_Store
+Thumbs.db
+
+# Abaikan output build lokal (jika ada)
+/dist
+/build
+*.log

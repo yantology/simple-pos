@@ -1,0 +1,43 @@
+# cloudbuild.yaml
+steps:
+  # 1. Bangun Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      # Tag image dengan format: region-docker.pkg.dev/PROJECT_ID/REPO_NAME/SERVICE_NAME:commit-sha
+      # Commit SHA memastikan setiap build unik
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
+      - './go-app' # Konteks build adalah direktori go-app
+    id: 'Build Image'
+
+  # 2. Push Docker image ke Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
+    id: 'Push Image'
+    waitFor: ['Build Image'] # Tunggu langkah build selesai
+
+  # 3. Deploy image baru ke Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}' # Nama service Cloud Run
+      - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA' # Image baru
+      - '--region=${_REGION}' # Region Cloud Run
+      - '--platform=managed' # Platform Cloud Run
+      - '--service-account=${_CLOUD_RUN_SA}' # Gunakan SA yang dikonfigurasi
+      - '--allow-unauthenticated' # Sesuaikan jika service Anda tidak publik
+      # '--quiet' # Uncomment untuk mengurangi output log gcloud
+    id: 'Deploy to Cloud Run'
+    waitFor: ['Push Image'] # Tunggu langkah push selesai
+
+# Simpan image yang di-build untuk referensi
+images:
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
+
+# Opsi Timeout (opsional)
+# timeout: 1200s # 20 menit
