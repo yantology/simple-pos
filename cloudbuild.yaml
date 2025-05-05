@@ -8,7 +8,7 @@ steps:
       # Tag image dengan format: region-docker.pkg.dev/PROJECT_ID/REPO_NAME/SERVICE_NAME:commit-sha
       # Commit SHA memastikan setiap build unik
       - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
-      - './go-app' # Konteks build adalah direktori go-app
+      - '.' # Konteks build adalah direktori go-app
     id: 'Build Image'
 
   # 2. Push Docker image ke Artifact Registry
