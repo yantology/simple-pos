@@ -1,6 +1,5 @@
 {
     "schemes": [
-        "http",
         "https"
     ],
     "swagger": "2.0",
@@ -19,7 +18,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8000",
+    "host": "go-backend-service-1022391354163.asia-southeast1.run.app",
     "basePath": "/api/v1",
     "paths": {
         "/auth/forget-password": {

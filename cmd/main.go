@@ -58,9 +58,9 @@ func initMigrations(db *sql.DB) error {
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8000
+// @host      go-backend-service-1022391354163.asia-southeast1.run.app
 // @BasePath  /api/v1
-// @schemes   http https
+// @schemes   https
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

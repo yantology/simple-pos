@@ -274,7 +274,7 @@ definitions:
     - name
     - price
     type: object
-host: localhost:8000
+host: go-backend-service-1022391354163.asia-southeast1.run.app
 info:
   contact:
     email: support@swagger.io
@@ -950,7 +950,6 @@ paths:
       tags:
       - products
 schemes:
-- http
 - https
 securityDefinitions:
   ApiKeyAuth:
