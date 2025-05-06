@@ -36,7 +36,7 @@ func (r *ResendUtils) Send(html, subject string, to []string) *customerror.Custo
 
 	_, err := client.Emails.Send(params)
 	if err != nil {
-		return customerror.NewCustomError(err, "Failed to send email", http.StatusInternalServerError)
+		return customerror.NewCustomError(err, err.Error(), http.StatusInternalServerError)
 	}
 
 	return nil
