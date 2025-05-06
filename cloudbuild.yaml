@@ -50,5 +50,10 @@ images:
   - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
   # --- AKHIR PERUBAHAN ---
 
+# --- TAMBAHKAN BAGIAN INI UNTUK MEMPERBAIKI ERROR ---
+# Tentukan bucket GCS untuk menyimpan log build
+logs_bucket: 'gs://logs-yantology'
+# --- AKHIR PENAMBAHAN ---
+
 # Opsi Timeout (opsional)
 # timeout: 1200s # 20 menit
