@@ -29,7 +29,6 @@ _testmain.go
 # Dependency directories
 vendor/
 Godeps/
-go.sum
 
 # Output directories
 bin/
