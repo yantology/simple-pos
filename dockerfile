@@ -4,7 +4,7 @@ FROM golang:1.24-alpine AS builder
 WORKDIR /app
 
 # Copy go mod file (go.sum will be generated if needed)
-COPY go.mod ./
+COPY go.mod go.sum ./
 
 # Download dependencies and generate go.sum
 RUN go mod download && go mod tidy
