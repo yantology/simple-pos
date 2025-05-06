@@ -50,8 +50,6 @@ steps:
       - '--set-secrets=JWT_ACCESS_SECRET=${_JWT_ACCESS_SECRET}:latest'
       - '--set-secrets=JWT_REFRESH_SECRET=${_JWT_REFRESH_SECRET}:latest'
       - '--set-secrets=RESEND_API_KEY=${_RESEND_API_SECRET}:latest'
-      # Resend Email Configuration
-      - '--set-env-vars=RESEND_DOMAIN=yantology.com'
     id: 'Deploy to Cloud Run'
     waitFor: ['Push SHA Image', 'Push Latest Image']
 
