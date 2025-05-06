@@ -25,6 +25,7 @@ type DBConfig struct {
 
 // InitDatabaseConfig initializes database configuration from environment variables or mounted secrets
 func InitDatabaseConfig() *DBConfig {
+	log.Println("Initializing database configuration...") // Added log
 	dbConfig := &DBConfig{
 		Host:     "127.0.0.1",
 		Port:     "3306",
