@@ -40,16 +40,6 @@ steps:
       - '--allow-unauthenticated'
       - '--add-cloudsql-instances=${_CLOUDSQL_CONNECTION}'
       - '--vpc-connector=${_VPC_CONNECTOR}'
-      - '--set-env-vars=DB_HOST=127.0.0.1'
-      - '--set-env-vars=DB_PORT=5432'
-      - '--set-env-vars=DB_NAME=${_DB_NAME}'
-      - '--set-env-vars=DB_USER=${_DB_USER}'
-      - '--set-env-vars=DB_DRIVER=postgres'
-      - '--set-env-vars=APP_PORT=8080'
-      - '--set-secrets=DB_PASSWORD=${_DB_PASSWORD_SECRET}:latest'
-      - '--set-secrets=JWT_ACCESS_SECRET=${_JWT_ACCESS_SECRET}:latest'
-      - '--set-secrets=JWT_REFRESH_SECRET=${_JWT_REFRESH_SECRET}:latest'
-      - '--set-secrets=RESEND_API_KEY=${_RESEND_API_SECRET}:latest'
     id: 'Deploy to Cloud Run'
     waitFor: ['Push SHA Image', 'Push Latest Image']
 
