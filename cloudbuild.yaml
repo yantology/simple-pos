@@ -35,10 +35,9 @@ steps:
       - '${_SERVICE_NAME}' # Nama service Cloud Run
       # --- UBAH BAGIAN INI ---
       - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest' # Image baru
-      # --- AKHIR PERUBAHAN ---
-      - '--region=${_REGION}' # Region Cloud Run
+      # --- AKHIR PERUBAHAN ---      - '--region=${_REGION}' # Region Cloud Run
       - '--platform=managed' # Platform Cloud Run
-      - '--service-account=${_CLOUD_RUN_SA}' # Gunakan SA yang dikonfigurasi
+      - '--service-account=${_SERVICE_ACCOUNT}' # Gunakan SA yang dikonfigurasi
       - '--allow-unauthenticated' # Sesuaikan jika service Anda tidak publik
       # '--quiet' # Uncomment untuk mengurangi output log gcloud
     id: 'Deploy to Cloud Run'
