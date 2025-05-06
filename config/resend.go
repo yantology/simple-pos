@@ -16,7 +16,7 @@ type ResendApi struct {
 
 func InitResendConfig() (*ResendApi, *customerror.CustomError) {
 	apiKey := os.Getenv("RESEND_API_KEY")
-	log.Println("Resend API key => ", apiKey != "")
+	log.Println("Resend API key => ", apiKey)
 	if apiKey == "" {
 		log.Println("Resend API key is not set")
 		return nil, customerror.NewCustomError(nil, "Resend API key is not set", http.StatusUnauthorized)
