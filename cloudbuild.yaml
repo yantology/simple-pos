@@ -5,10 +5,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      # --- UBAH BAGIAN INI ---
-      # Gunakan nama image 'go-app' dan tag 'latest'
-      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
-      # --- AKHIR PERUBAHAN ---
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/go-app:latest'
       - '.' # Konteks build adalah direktori root repo (pastikan Dockerfile ada di sini atau sesuaikan path)
     id: 'Build Image'
 
@@ -16,44 +13,35 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      # --- UBAH BAGIAN INI ---
-      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
-      # --- AKHIR PERUBAHAN ---
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/go-app:latest'
     id: 'Push Image'
     waitFor: ['Build Image'] # Tunggu langkah build selesai
-
   # 3. Deploy image baru ke Cloud Run
-  #    Catatan: Langkah deploy ini sebenarnya redundan jika Anda mengelola Cloud Run
-  #    dengan Terraform. Terraform akan mengambil image 'latest' saat 'apply'.
-  #    Anda bisa menghapus langkah deploy ini dari cloudbuild.yaml jika mau,
-  #    atau biarkan saja (akan men-deploy revisi yang sama dengan image 'latest').
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}' # Nama service Cloud Run
-      # --- UBAH BAGIAN INI ---
-      - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest' # Image baru
-      # --- AKHIR PERUBAHAN ---
+      - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/go-app:latest' # Image baru
       - '--region=${_REGION}' # Region Cloud Run
       - '--platform=managed' # Platform Cloud Run
-      - '--service-account=${_CLOUD_RUN_SA}' # Gunakan SA yang dikonfigurasi
+      - '--service-account=${_SERVICE_ACCOUNT}' # Gunakan SA yang dikonfigurasi
       - '--allow-unauthenticated' # Sesuaikan jika service Anda tidak publik
-      # '--quiet' # Uncomment untuk mengurangi output log gcloud
+      - '--set-cloudsql-instances=${_CLOUDSQL_CONNECTION}'
+      - '--vpc-connector=${_VPC_CONNECTOR}'
+      - '--set-secrets=DB_PASSWORD=projects/${_PROJECT_ID}/secrets/${_DB_PASSWORD_SECRET}:latest'
+      - '--set-secrets=JWT_ACCESS_SECRET=projects/${_PROJECT_ID}/secrets/${_JWT_ACCESS_SECRET}:latest'
+      - '--set-secrets=JWT_REFRESH_SECRET=projects/${_PROJECT_ID}/secrets/${_JWT_REFRESH_SECRET}:latest'
+      - '--set-secrets=RESEND_API_KEY=projects/${_PROJECT_ID}/secrets/${_RESEND_API_SECRET}:latest'
+      - '--set-env-vars=DB_USER=${_DB_USER}'
+      - '--set-env-vars=DB_NAME=${_DB_NAME}'
     id: 'Deploy to Cloud Run'
     waitFor: ['Push Image'] # Tunggu langkah push selesai
 
 # Simpan image yang di-build untuk referensi
 images:
-  # --- UBAH BAGIAN INI ---
-  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
-  # --- AKHIR PERUBAHAN ---
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/go-app:latest'
 
-# --- TAMBAHKAN BAGIAN INI UNTUK MEMPERBAIKI ERROR ---
-# Tentukan bucket GCS untuk menyimpan log build
-logs_bucket: 'gs://logs-yantology'
-# --- AKHIR PENAMBAHAN ---
-
-# Opsi Timeout (opsional)
-# timeout: 1200s # 20 menit
+# Timeout (opsional)
+timeout: 1200s # 20 menit
