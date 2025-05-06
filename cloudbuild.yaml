@@ -5,7 +5,9 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:${COMMIT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '.'
     id: 'Build Image'
 
@@ -13,8 +15,15 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
-    id: 'Push Image'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:${COMMIT_SHA}'
+    id: 'Push SHA Image'
+    waitFor: ['Build Image']
+    
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:latest'
+    id: 'Push Latest Image'
     waitFor: ['Build Image']
 
   # 3. Deploy image baru ke Cloud Run
@@ -24,17 +33,30 @@ steps:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}'
-      - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
+      - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:${COMMIT_SHA}'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--service-account=${_SERVICE_ACCOUNT}'
       - '--allow-unauthenticated'
+      - '--add-cloudsql-instances=${_CLOUDSQL_CONNECTION}'
+      - '--vpc-connector=${_VPC_CONNECTOR}'
+      - '--set-env-vars=DB_HOST=127.0.0.1'
+      - '--set-env-vars=DB_PORT=5432'
+      - '--set-env-vars=DB_NAME=${_DB_NAME}'
+      - '--set-env-vars=DB_USER=${_DB_USER}'
+      - '--set-env-vars=DB_DRIVER=postgres'
+      - '--set-env-vars=APP_PORT=8080'
+      - '--set-secrets=DB_PASSWORD=${_DB_PASSWORD_SECRET}:latest'
+      - '--set-secrets=JWT_ACCESS_SECRET=${_JWT_ACCESS_SECRET}:latest'
+      - '--set-secrets=JWT_REFRESH_SECRET=${_JWT_REFRESH_SECRET}:latest'
+      - '--set-secrets=RESEND_API_KEY=${_RESEND_API_SECRET}:latest'
     id: 'Deploy to Cloud Run'
-    waitFor: ['Push Image']
+    waitFor: ['Push SHA Image', 'Push Latest Image']
 
 # Simpan image yang di-build untuk referensi
 images:
-  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest'
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:${COMMIT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/${_IMAGE_NAME}:latest'
 
 # Tentukan bucket GCS untuk menyimpan log build
 logs_bucket: 'gs://logs-yantology'

@@ -20,6 +20,9 @@ FROM alpine:latest
 
 WORKDIR /app
 
+# Install CA certificates for HTTPS connections
+RUN apk --no-cache add ca-certificates
+
 # Copy the built binary from the builder stage
 COPY --from=builder /app/main .
 
@@ -30,6 +33,9 @@ COPY migrations ./migrations
 
 # Expose the port Cloud Run expects (and the app should listen on via $PORT)
 EXPOSE 8080
+
+# Set PORT environment variable as fallback if not provided by Cloud Run
+ENV PORT=8080
 
 # Use ENTRYPOINT to run the application
 ENTRYPOINT ["./main"]
