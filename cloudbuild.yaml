@@ -21,7 +21,6 @@ steps:
       # --- AKHIR PERUBAHAN ---
     id: 'Push Image'
     waitFor: ['Build Image'] # Tunggu langkah build selesai
-
   # 3. Deploy image baru ke Cloud Run
   #    Catatan: Langkah deploy ini sebenarnya redundan jika Anda mengelola Cloud Run
   #    dengan Terraform. Terraform akan mengambil image 'latest' saat 'apply'.
@@ -35,7 +34,8 @@ steps:
       - '${_SERVICE_NAME}' # Nama service Cloud Run
       # --- UBAH BAGIAN INI ---
       - '--image=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_AR_REPO_NAME}/go-app:latest' # Image baru
-      # --- AKHIR PERUBAHAN ---      - '--region=${_REGION}' # Region Cloud Run
+      # --- AKHIR PERUBAHAN ---
+      - '--region=${_REGION}' # Region Cloud Run
       - '--platform=managed' # Platform Cloud Run
       - '--service-account=${_SERVICE_ACCOUNT}' # Gunakan SA yang dikonfigurasi
       - '--allow-unauthenticated' # Sesuaikan jika service Anda tidak publik
