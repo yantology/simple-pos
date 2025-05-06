@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"  // Added import
+	"strings" // Added import
 
 	_ "github.com/go-sql-driver/mysql" // MySQL driver
 	_ "github.com/lib/pq"              // PostgreSQL driver
@@ -71,24 +73,50 @@ type OpenFunc func(driverName, dataSourceName string) (*sql.DB, error)
 func ConnectDatabase(dbConfig *DBConfig, openFunc OpenFunc) *sql.DB {
 	var db *sql.DB
 	var errConnection error
+	var dsn string // Declare dsn variable
 
 	if dbConfig.Driver == "mysql" {
-		dsnMysql := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+		// Handle MySQL connection (assuming it needs standard host/port)
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 			dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Name)
-		db, errConnection = openFunc(dbConfig.Driver, dsnMysql)
+		log.Printf("Connecting to MySQL with DSN: %s:%s@tcp(%s:%s)/%s\\n", dbConfig.User, "[MASKED]", dbConfig.Host, dbConfig.Port, dbConfig.Name) // Log DSN without password
+
 	} else if dbConfig.Driver == "postgres" {
-		dsnPgSql := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&TimeZone=Asia/Jakarta",
-			dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Name)
-		db, errConnection = openFunc(dbConfig.Driver, dsnPgSql)
+		// Check if DB_HOST is a Unix socket path for Cloud SQL
+		if strings.HasPrefix(dbConfig.Host, "/") { // Check if Host starts with '/' (likely a socket path)
+			// Use Unix socket DSN format
+			dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
+				dbConfig.Host, dbConfig.User, dbConfig.Password, dbConfig.Name)
+			log.Printf("Connecting to PostgreSQL (Cloud SQL Socket) with DSN: host=%s user=%s password=%s dbname=%s sslmode=disable\\n", dbConfig.Host, dbConfig.User, "[MASKED]", dbConfig.Name) // Log DSN without password
+		} else {
+			// Use standard host/port DSN format
+			dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", // Removed TimeZone for simplicity, add if needed
+				dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
+			log.Printf("Connecting to PostgreSQL (Host/Port) with DSN: host=%s port=%s user=%s password=%s dbname=%s sslmode=disable\\n", dbConfig.Host, dbConfig.Port, dbConfig.User, "[MASKED]", dbConfig.Name) // Log DSN without password
+		}
 	} else {
-		fmt.Printf("invalid database driver: %s\n", dbConfig.Driver)
-		os.Exit(1)
+		log.Fatalf("invalid database driver: %s\\n", dbConfig.Driver) // Use log.Fatalf for fatal errors
 	}
 
+	// Attempt connection
+	db, errConnection = openFunc(dbConfig.Driver, dsn)
 	if errConnection != nil {
-		fmt.Printf("failed to connect to database: %v", errConnection)
-		os.Exit(1)
+		log.Fatalf("failed to connect to database (%s): %v\\nDSN used: %s\\n", dbConfig.Driver, errConnection, maskPassword(dsn)) // Log error with masked DSN
 	}
 
+	log.Printf("Successfully connected to %s database.\\n", dbConfig.Driver)
 	return db
+}
+
+// Helper function to mask password in DSN for logging
+func maskPassword(dsn string) string {
+	// Basic masking for key=value format
+	re := regexp.MustCompile(`(password|passwd|pwd)=([^ ]+)`)
+	maskedDSN := re.ReplaceAllString(dsn, "$1=[MASKED]")
+
+	// Masking for postgres://user:password@host format
+	rePostgres := regexp.MustCompile(`:(//[^:]+:)([^@]+)@`)
+	maskedDSN = rePostgres.ReplaceAllString(maskedDSN, ":$1[MASKED]@")
+
+	return maskedDSN
 }
