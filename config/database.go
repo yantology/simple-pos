@@ -3,10 +3,11 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"regexp"  // Added import
-	"strings" // Added import
+	"regexp"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql" // MySQL driver
 	_ "github.com/lib/pq"              // PostgreSQL driver
@@ -22,7 +23,7 @@ type DBConfig struct {
 	Driver   string
 }
 
-// InitDatabaseConfig initializes database configuration from environment variables
+// InitDatabaseConfig initializes database configuration from environment variables or mounted secrets
 func InitDatabaseConfig() *DBConfig {
 	dbConfig := &DBConfig{
 		Host:     "127.0.0.1",
@@ -53,9 +54,26 @@ func InitDatabaseConfig() *DBConfig {
 		dbConfig.User = env
 	}
 
-	if env := os.Getenv("DB_PASSWORD"); env != "" {
-		log.Println("DB_PASSWORD => ", "[MASKED]") // For security, don't log the actual password
-		dbConfig.Password = env
+	// Read DB_PASSWORD: prioritize env var, fallback to secret file
+	dbPasswordEnv := os.Getenv("DB_PASSWORD")
+	if dbPasswordEnv != "" {
+		log.Println("DB_PASSWORD => Read from environment variable [MASKED]")
+		dbConfig.Password = dbPasswordEnv
+	} else {
+		// Try reading from the mounted secret file (Cloud Run)
+		secretPath := "/secrets/db_password/db_password"
+		if _, err := os.Stat(secretPath); err == nil {
+			log.Printf("DB_PASSWORD => Attempting to read from secret file: %s\n", secretPath)
+			passwordBytes, err := ioutil.ReadFile(secretPath)
+			if err != nil {
+				log.Fatalf("Failed to read database password secret file %s: %v\n", secretPath, err)
+			}
+			dbConfig.Password = strings.TrimSpace(string(passwordBytes))
+			log.Println("DB_PASSWORD => Successfully read from secret file [MASKED]")
+		} else {
+			log.Println("DB_PASSWORD => Not found in environment variable or secret file. Using default (if any) or empty.")
+			// Keep the default empty password if neither env var nor file exists
+		}
 	}
 
 	if env := os.Getenv("DB_DRIVER"); env != "" {
